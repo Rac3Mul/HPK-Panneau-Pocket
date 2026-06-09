@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,12 +31,19 @@ Intégration PanneauPocket : widget flottant, shortcodes, publication WordPress 
 
 Si le dépôt GitHub est configuré, allez dans Extensions : une notification « mise à jour disponible » apparaît. Cliquez sur « Mettre à jour maintenant ».
 
+= Dépôt GitHub public ? =
+
+Rien à configurer : les mises à jour apparaissent dans Extensions automatiquement (via GitHub Releases).
+
 = Dépôt GitHub privé ? =
 
 Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.2.1 =
+* Dépôt GitHub par défaut : Rac3Mul/HPK-Panneau-Pocket
 
 = 1.2.0 =
 * Mises à jour automatiques via GitHub Releases (Plugin Update Checker)

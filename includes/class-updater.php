@@ -27,7 +27,7 @@ class HPK_PP_Updater {
 
 		$repo = apply_filters(
 			'hpk_pp_github_repo',
-			defined( 'HPK_PP_GITHUB_REPO' ) ? HPK_PP_GITHUB_REPO : 'https://github.com/HPK-PanneauPocket/hpk-panneaupocket/'
+			defined( 'HPK_PP_GITHUB_REPO' ) ? HPK_PP_GITHUB_REPO : 'https://github.com/Rac3Mul/HPK-Panneau-Pocket/'
 		);
 
 		$repo = untrailingslashit( trim( (string) $repo ) );

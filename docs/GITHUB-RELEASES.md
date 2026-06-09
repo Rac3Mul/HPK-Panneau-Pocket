@@ -2,20 +2,26 @@
 
 ## Configuration du dépôt (une fois)
 
-1. Créez un repo GitHub, ex. `https://github.com/HPK-PanneauPocket/hpk-panneaupocket`
+1. Créez un repo GitHub : `https://github.com/Rac3Mul/HPK-Panneau-Pocket`
 2. Poussez le contenu du dossier `hpk-panneaupocket/`
 3. Branche par défaut : `main`
 
-### Repo privé
+### Repo public (recommandé)
+
+Aucune configuration sur le site WordPress : le plugin interroge GitHub automatiquement.
+
+URL du dépôt (déjà configurée dans le plugin) :
+`https://github.com/Rac3Mul/HPK-Panneau-Pocket/`
+
+### Repo privé (optionnel)
 
 Dans `wp-config.php` sur chaque site client :
 
 ```php
-define( 'HPK_PP_GITHUB_REPO', 'https://github.com/VOTRE-ORG/hpk-panneaupocket/' );
 define( 'HPK_PP_GITHUB_TOKEN', 'ghp_xxxxxxxxxxxxxxxxxxxx' );
 ```
 
-Créez un token GitHub (Settings → Developer settings → Personal access tokens) avec au minimum `repo` (repo privé) ou `public_repo`.
+Créez un token GitHub (Settings → Developer settings → Personal access tokens) avec `repo`.
 
 ## Publier une nouvelle version
 
