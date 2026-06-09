@@ -1,0 +1,46 @@
+name: Release plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build plugin zip
+        run: |
+          if [ -f "hpk-panneaupocket/hpk-panneaupocket.php" ]; then
+            cd hpk-panneaupocket
+            zip -r ../hpk-panneaupocket.zip . \
+              -x "*.git*" \
+              -x ".github/*"
+          elif [ -f "hpk-panneaupocket.php" ]; then
+            mkdir -p build/hpk-panneaupocket
+            rsync -a \
+              --exclude .git \
+              --exclude .github \
+              --exclude build \
+              --exclude hpk-panneaupocket.zip \
+              ./ build/hpk-panneaupocket/
+            cd build
+            zip -r ../hpk-panneaupocket.zip hpk-panneaupocket
+          else
+            echo "Plugin main file not found."
+            exit 1
+          fi
+          ls -la hpk-panneaupocket.zip
+          unzip -l hpk-panneaupocket.zip | head -20
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: hpk-panneaupocket.zip
+          generate_release_notes: true
