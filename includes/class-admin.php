@@ -260,24 +260,51 @@ class HPK_PP_Admin {
 		wp_enqueue_style( 'hpk-pp-admin', HPK_PP_URL . 'assets/css/admin.css', array(), HPK_PP_VERSION );
 		wp_enqueue_script( 'hpk-pp-admin', HPK_PP_URL . 'assets/js/admin.js', array( 'jquery' ), HPK_PP_VERSION, true );
 
-		wp_localize_script(
-			'hpk-pp-admin',
-			'hpkPpAdmin',
-			array(
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'hpk_pp_admin' ),
-				'i18n'    => array(
-					'testing'  => __( 'Test en cours…', 'hpk-panneaupocket' ),
-					'sending'  => __( 'Envoi en cours…', 'hpk-panneaupocket' ),
-					'success'  => __( 'Succès', 'hpk-panneaupocket' ),
-					'error'    => __( 'Erreur', 'hpk-panneaupocket' ),
-					'copied'   => __( 'Copié !', 'hpk-panneaupocket' ),
-				),
-			)
+		$admin_i18n = array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'hpk_pp_admin' ),
+			'i18n'    => array(
+				'testing'  => __( 'Test en cours…', 'hpk-panneaupocket' ),
+				'sending'  => __( 'Envoi en cours…', 'hpk-panneaupocket' ),
+				'success'  => __( 'Succès', 'hpk-panneaupocket' ),
+				'error'    => __( 'Erreur', 'hpk-panneaupocket' ),
+				'copied'   => __( 'Copié !', 'hpk-panneaupocket' ),
+			),
 		);
 
-		if ( 'post.php' === $hook || 'post-new.php' === $hook ) {
+		wp_localize_script( 'hpk-pp-admin', 'hpkPpAdmin', $admin_i18n );
+
+		$is_publication_page = ( false !== strpos( $hook, 'hpk-pp-publication' ) );
+
+		if ( 'post.php' === $hook || 'post-new.php' === $hook || $is_publication_page ) {
 			wp_enqueue_media();
+		}
+
+		if ( $is_publication_page ) {
+			wp_enqueue_editor();
+			wp_enqueue_script(
+				'hpk-pp-publication',
+				HPK_PP_URL . 'assets/js/publication.js',
+				array( 'jquery', 'hpk-pp-admin' ),
+				HPK_PP_VERSION,
+				true
+			);
+			wp_localize_script(
+				'hpk-pp-publication',
+				'hpkPpPublication',
+				array(
+					'editorId'      => 'hpk_pp_publication_content',
+					'communityName' => get_bloginfo( 'name' ),
+					'cityId'        => get_option( 'hpk_pp_city_id', '' ),
+					'i18n'          => array(
+						'previewTitle'       => __( 'Aperçu PanneauPocket', 'hpk-panneaupocket' ),
+						'placeholderTitle'   => __( 'Écrivez le titre', 'hpk-panneaupocket' ),
+						'placeholderContent' => __( 'Votre message apparaîtra ici…', 'hpk-panneaupocket' ),
+						'typeInfo'           => __( 'Information', 'hpk-panneaupocket' ),
+						'typeAlert'          => __( 'Alerte', 'hpk-panneaupocket' ),
+					),
+				)
+			);
 		}
 	}
 
@@ -683,54 +710,124 @@ class HPK_PP_Admin {
 		if ( ! is_array( $docs ) || empty( $docs ) ) {
 			$docs = array( '' );
 		}
+		$title_len = function_exists( 'mb_strlen' ) ? mb_strlen( $title ) : strlen( $title );
 		?>
-		<div class="wrap hpk-pp-admin">
+		<div class="wrap hpk-pp-admin hpk-pp-publication">
 			<h1><?php esc_html_e( 'PanneauPocket — Publication', 'hpk-panneaupocket' ); ?></h1>
 			<p><?php esc_html_e( 'Publiez directement sur PanneauPocket sans créer d\'article WordPress public.', 'hpk-panneaupocket' ); ?></p>
 
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="hpk_pp_save_publication" />
-				<input type="hidden" name="sign_id" value="<?php echo esc_attr( $sign_id ); ?>" />
-				<?php wp_nonce_field( 'hpk_pp_publication' ); ?>
+			<div class="hpk-pp-publication__layout">
+				<div class="hpk-pp-publication__form">
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="hpk-pp-publication-form">
+						<input type="hidden" name="action" value="hpk_pp_save_publication" />
+						<input type="hidden" name="sign_id" value="<?php echo esc_attr( $sign_id ); ?>" />
+						<?php wp_nonce_field( 'hpk_pp_publication' ); ?>
 
-				<table class="form-table">
-					<tr><th><?php esc_html_e( 'Titre (max 50)', 'hpk-panneaupocket' ); ?></th><td><input type="text" name="title" value="<?php echo esc_attr( $title ); ?>" maxlength="50" class="regular-text hpk-pp-title-input" required /></td></tr>
-					<tr>
-						<th><?php esc_html_e( 'Type', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<select name="type">
-								<option value="info" <?php selected( $type, 'info' ); ?>>info</option>
-								<option value="alert" <?php selected( $type, 'alert' ); ?>>alert</option>
-							</select>
-						</td>
-					</tr>
-					<tr><th><?php esc_html_e( 'Date début', 'hpk-panneaupocket' ); ?></th><td><input type="date" name="start_at" value="<?php echo esc_attr( $start_at ); ?>" required /></td></tr>
-					<tr><th><?php esc_html_e( 'Date fin', 'hpk-panneaupocket' ); ?></th><td><input type="date" name="end_at" value="<?php echo esc_attr( $end_at ); ?>" /></td></tr>
-					<tr><th><?php esc_html_e( 'Contenu HTML', 'hpk-panneaupocket' ); ?></th><td><textarea name="content" rows="8" class="large-text"><?php echo esc_textarea( $content ); ?></textarea></td></tr>
-					<tr><th><?php esc_html_e( 'Documents', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<?php foreach ( $docs as $doc ) : ?>
-								<p><input type="url" name="documents[]" value="<?php echo esc_url( $doc ); ?>" class="large-text" /></p>
-							<?php endforeach; ?>
-							<p><input type="url" name="documents[]" value="" class="large-text" placeholder="https://" /></p>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Options', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<label><input type="checkbox" name="draft_mode" value="1" /> <?php esc_html_e( 'Préparer sans envoyer', 'hpk-panneaupocket' ); ?></label><br />
-							<label><input type="checkbox" name="create_wp_post" value="1" /> <?php esc_html_e( 'Créer aussi un article WordPress public', 'hpk-panneaupocket' ); ?></label>
-						</td>
-					</tr>
-				</table>
+						<table class="form-table">
+							<tr>
+								<th><?php esc_html_e( 'Titre (max 50)', 'hpk-panneaupocket' ); ?></th>
+								<td>
+									<input type="text" name="title" value="<?php echo esc_attr( $title ); ?>" maxlength="50" class="regular-text hpk-pp-title-input hpk-pp-preview-title" required />
+									<span class="hpk-pp-char-count"><span class="hpk-pp-char-current"><?php echo esc_html( $title_len ); ?></span>/50</span>
+								</td>
+							</tr>
+							<tr>
+								<th><?php esc_html_e( 'Type', 'hpk-panneaupocket' ); ?></th>
+								<td>
+									<select name="type" class="hpk-pp-preview-type">
+										<option value="info" <?php selected( $type, 'info' ); ?>><?php esc_html_e( 'Information', 'hpk-panneaupocket' ); ?></option>
+										<option value="alert" <?php selected( $type, 'alert' ); ?>><?php esc_html_e( 'Alerte', 'hpk-panneaupocket' ); ?></option>
+									</select>
+								</td>
+							</tr>
+							<tr><th><?php esc_html_e( 'Date début', 'hpk-panneaupocket' ); ?></th><td><input type="date" name="start_at" value="<?php echo esc_attr( $start_at ); ?>" required /></td></tr>
+							<tr><th><?php esc_html_e( 'Date fin', 'hpk-panneaupocket' ); ?></th><td><input type="date" name="end_at" value="<?php echo esc_attr( $end_at ); ?>" /></td></tr>
+							<tr>
+								<th><?php esc_html_e( 'Contenu', 'hpk-panneaupocket' ); ?></th>
+								<td>
+									<p class="description"><?php esc_html_e( 'Utilisez la barre d\'outils (gras, italique, liens…) — pas besoin d\'écrire du HTML à la main.', 'hpk-panneaupocket' ); ?></p>
+									<?php
+									wp_editor(
+										$content,
+										'hpk_pp_publication_content',
+										array(
+											'textarea_name' => 'content',
+											'textarea_rows' => 12,
+											'media_buttons' => false,
+											'teeny'         => false,
+											'quicktags'     => true,
+											'tinymce'       => array(
+												'toolbar1' => 'bold,italic,underline,strikethrough,|,bullist,numlist,|,link,unlink,|,removeformat',
+												'toolbar2' => '',
+											),
+										)
+									);
+									?>
+								</td>
+							</tr>
+							<tr>
+								<th><?php esc_html_e( 'Images & documents', 'hpk-panneaupocket' ); ?></th>
+								<td>
+									<p class="description">
+										<?php esc_html_e( 'Jusqu\'à 5 fichiers (jpg, png ou pdf, 15 Mo max). L\'API PanneauPocket attend une URL publique — choisissez depuis la médiathèque WordPress.', 'hpk-panneaupocket' ); ?>
+									</p>
+									<p class="description">
+										<?php esc_html_e( 'La banque d\'images officielle PanneauPocket n\'est pas exposée dans l\'API publique : utilisez gestion.panneaupocket.com pour ces visuels, ou uploadez ici.', 'hpk-panneaupocket' ); ?>
+									</p>
+									<div class="hpk-pp-documents" data-input-name="documents[]">
+										<?php foreach ( $docs as $doc ) : ?>
+											<p class="hpk-pp-doc-row">
+												<input type="url" name="documents[]" value="<?php echo esc_url( $doc ); ?>" class="large-text hpk-pp-doc-url" placeholder="https://" />
+												<button type="button" class="button hpk-pp-media-btn"><?php esc_html_e( 'Média', 'hpk-panneaupocket' ); ?></button>
+											</p>
+										<?php endforeach; ?>
+										<button type="button" class="button hpk-pp-add-doc"><?php esc_html_e( 'Ajouter un fichier', 'hpk-panneaupocket' ); ?></button>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<th><?php esc_html_e( 'Options', 'hpk-panneaupocket' ); ?></th>
+								<td>
+									<label><input type="checkbox" name="draft_mode" value="1" /> <?php esc_html_e( 'Préparer sans envoyer', 'hpk-panneaupocket' ); ?></label><br />
+									<label><input type="checkbox" name="create_wp_post" value="1" /> <?php esc_html_e( 'Créer aussi un article WordPress public', 'hpk-panneaupocket' ); ?></label>
+								</td>
+							</tr>
+						</table>
 
-				<p>
-					<button type="submit" name="pub_action" value="create" class="button button-primary"><?php esc_html_e( 'Envoyer sur PanneauPocket', 'hpk-panneaupocket' ); ?></button>
-					<?php if ( $sign_id ) : ?>
-						<button type="submit" name="pub_action" value="update" class="button"><?php esc_html_e( 'Mettre à jour sur PanneauPocket', 'hpk-panneaupocket' ); ?></button>
-					<?php endif; ?>
-				</p>
-			</form>
+						<p>
+							<button type="submit" name="pub_action" value="create" class="button button-primary"><?php esc_html_e( 'Envoyer sur PanneauPocket', 'hpk-panneaupocket' ); ?></button>
+							<?php if ( $sign_id ) : ?>
+								<button type="submit" name="pub_action" value="update" class="button"><?php esc_html_e( 'Mettre à jour sur PanneauPocket', 'hpk-panneaupocket' ); ?></button>
+							<?php endif; ?>
+						</p>
+					</form>
+				</div>
+
+				<aside class="hpk-pp-publication__preview-wrap" aria-label="<?php esc_attr_e( 'Aperçu PanneauPocket', 'hpk-panneaupocket' ); ?>">
+					<h2 class="hpk-pp-publication__preview-heading"><?php esc_html_e( 'Aperçu PanneauPocket', 'hpk-panneaupocket' ); ?></h2>
+					<div class="hpk-pp-phone-preview">
+						<div class="hpk-pp-phone-preview__header">
+							<div class="hpk-pp-phone-preview__community">
+								<strong class="hpk-pp-preview-community-name"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></strong>
+								<?php if ( get_option( 'hpk_pp_city_id', '' ) ) : ?>
+									<span class="hpk-pp-phone-preview__city-id"><?php echo esc_html( get_option( 'hpk_pp_city_id', '' ) ); ?></span>
+								<?php endif; ?>
+							</div>
+							<div class="hpk-pp-phone-preview__logo" aria-hidden="true"></div>
+						</div>
+						<div class="hpk-pp-phone-preview__badge hpk-pp-preview-type-badge"><?php esc_html_e( 'Information', 'hpk-panneaupocket' ); ?></div>
+						<div class="hpk-pp-phone-preview__title hpk-pp-preview-title-display"><?php echo $title ? esc_html( $title ) : esc_html__( 'Écrivez le titre', 'hpk-panneaupocket' ); ?></div>
+						<div class="hpk-pp-phone-preview__content hpk-pp-preview-content-display">
+							<?php if ( $content ) : ?>
+								<?php echo wp_kses_post( $content ); ?>
+							<?php else : ?>
+								<p class="hpk-pp-phone-preview__placeholder"><?php esc_html_e( 'Votre message apparaîtra ici…', 'hpk-panneaupocket' ); ?></p>
+							<?php endif; ?>
+						</div>
+						<div class="hpk-pp-phone-preview__docs hpk-pp-preview-docs-display"></div>
+					</div>
+				</aside>
+			</div>
 		</div>
 		<?php
 	}

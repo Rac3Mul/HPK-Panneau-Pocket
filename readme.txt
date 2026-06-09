@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.2.4 =
+* Page Publication : éditeur visuel (gras, italique, liens…)
+* Upload images/PDF via médiathèque WordPress
+* Aperçu mobile en direct avant envoi
 
 = 1.2.3 =
 * Compatibilité WordPress 6.9.x et 7.0 déclarée

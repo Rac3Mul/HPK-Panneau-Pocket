@@ -111,38 +111,35 @@
 	});
 
 	/* Media picker for documents */
-	var mediaFrame;
 	$(document).on('click', '.hpk-pp-media-btn', function (e) {
 		e.preventDefault();
 		var $input = $(this).closest('.hpk-pp-doc-row').find('input[type="url"]');
 
-		if (mediaFrame) {
-			mediaFrame.open();
-			return;
-		}
-
-		mediaFrame = wp.media({
+		var frame = wp.media({
 			title: 'Choisir un document',
 			button: { text: 'Utiliser' },
 			multiple: false,
 			library: { type: ['image', 'application/pdf'] }
 		});
 
-		mediaFrame.on('select', function () {
-			var attachment = mediaFrame.state().get('selection').first().toJSON();
-			$input.val(attachment.url);
+		frame.on('select', function () {
+			var attachment = frame.state().get('selection').first().toJSON();
+			$input.val(attachment.url).trigger('change');
 		});
 
-		mediaFrame.open();
+		frame.open();
 	});
 
 	/* Add document row */
 	$(document).on('click', '.hpk-pp-add-doc', function () {
 		var $docs = $(this).closest('.hpk-pp-documents');
 		var count = $docs.find('.hpk-pp-doc-row').length;
-		if (count >= 5) return;
+		if (count >= 5) {
+			return;
+		}
+		var inputName = $docs.data('input-name') || '_panneaupocket_documents[]';
 		$docs.find('.hpk-pp-add-doc').before(
-			'<p class="hpk-pp-doc-row"><input type="url" name="_panneaupocket_documents[]" value="" class="widefat" placeholder="https://" />' +
+			'<p class="hpk-pp-doc-row"><input type="url" name="' + inputName + '" value="" class="widefat hpk-pp-doc-url" placeholder="https://" />' +
 			'<button type="button" class="button hpk-pp-media-btn">Média</button></p>'
 		);
 	});
