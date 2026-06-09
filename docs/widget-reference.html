@@ -1,0 +1,23 @@
+<!--
+Reference officielle PanneauPocket — widget iframe
+
+Production :
+https://app.panneaupocket.com/embeded/{cityId}?mode=widget&autoNavigation=0
+https://app.panneaupocket.com/embeded/1463772976?mode=widgetTv&autoNavigation=10
+
+Parametres :
+- mode: widget | widgetTv
+- autoNavigation: 0 | 10 | 15 | 30 ...
+- bgColor (widgetTv): hex sans # (ex: ffffff)
+
+Styles iframe (OpenAPI / doc PanneauPocket) :
+- mode=widget  : height:518px; width:330px; border:none
+- mode=widgetTv: position:relative; height:100%; width:100%; z-index:10; border:none
+-->
+
+<iframe
+	src="https://app.panneaupocket.com/embeded/1463772976?mode=widgetTv&autoNavigation=10"
+	style="position: relative; height: 100%; width: 100%; z-index: 10; border: none"
+	title="PanneauPocket"
+	loading="lazy"
+></iframe>

@@ -1,0 +1,122 @@
+/**
+ * Admin styles — HPK PanneauPocket Connect
+ */
+
+.hpk-pp-admin .hpk-pp-notice.success {
+	color: #00a32a;
+	padding: 8px 12px;
+	background: #edfaef;
+	border-left: 4px solid #00a32a;
+}
+
+.hpk-pp-admin .hpk-pp-notice.error {
+	color: #b32d2e;
+	padding: 8px 12px;
+	background: #fcf0f1;
+	border-left: 4px solid #b32d2e;
+}
+
+.hpk-pp-metabox .hpk-pp-status {
+	padding: 8px 12px;
+	border-radius: 4px;
+	margin-bottom: 12px;
+}
+
+.hpk-pp-status--envoye,
+.hpk-pp-status--modifie {
+	background: #edfaef;
+	border-left: 4px solid #00a32a;
+}
+
+.hpk-pp-status--erreur {
+	background: #fcf0f1;
+	border-left: 4px solid #b32d2e;
+}
+
+.hpk-pp-status--non_envoye {
+	background: #f0f0f1;
+	border-left: 4px solid #787c82;
+}
+
+.hpk-pp-char-count {
+	font-size: 12px;
+	color: #666;
+	margin-left: 8px;
+}
+
+.hpk-pp-char-count.is-over {
+	color: #b32d2e;
+	font-weight: bold;
+}
+
+.hpk-pp-dates input[type="date"] {
+	margin-right: 16px;
+}
+
+.hpk-pp-metabox-actions {
+	margin-top: 16px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.hpk-pp-doc-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.hpk-pp-doc-row input {
+	flex: 1;
+}
+
+.hpk-pp-ajax-notice {
+	margin-top: 12px;
+	padding: 8px 12px;
+	border-radius: 4px;
+}
+
+.hpk-pp-ajax-notice.success {
+	background: #edfaef;
+	color: #00a32a;
+}
+
+.hpk-pp-ajax-notice.error {
+	background: #fcf0f1;
+	color: #b32d2e;
+}
+
+.hpk-pp-payload-preview {
+	background: #1e1e1e;
+	color: #d4d4d4;
+	padding: 12px;
+	border-radius: 4px;
+	overflow-x: auto;
+	font-size: 12px;
+	margin-top: 12px;
+	max-height: 300px;
+}
+
+.hpk-pp-copy-block {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 8px;
+	padding: 8px 12px;
+	background: #f6f7f7;
+	border-radius: 4px;
+}
+
+.hpk-pp-copy-block code {
+	flex: 1;
+	word-break: break-all;
+}
+
+.hpk-pp-test-result {
+	margin-top: 12px;
+}
+
+.hpk-pp-meta {
+	font-size: 12px;
+	color: #666;
+}

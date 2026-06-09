@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "hpk-panneaupocket/iframe",
+  "title": "PanneauPocket Widget",
+  "category": "widgets",
+  "icon": "embed-generic",
+  "description": "Affiche le widget PanneauPocket en iframe.",
+  "textdomain": "hpk-panneaupocket",
+  "attributes": {
+    "mode": {
+      "type": "string",
+      "default": "widget"
+    },
+    "autoNavigation": {
+      "type": "number",
+      "default": 0
+    },
+    "bgColor": {
+      "type": "string",
+      "default": ""
+    },
+    "cityId": {
+      "type": "string",
+      "default": ""
+    },
+    "width": {
+      "type": "string",
+      "default": "330px"
+    },
+    "height": {
+      "type": "string",
+      "default": "518px"
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "editorScript": "hpk-pp-block-iframe-editor"
+}

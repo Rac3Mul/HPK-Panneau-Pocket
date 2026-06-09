@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "hpk-panneaupocket/news",
+  "title": "PanneauPocket Actualités",
+  "category": "widgets",
+  "icon": "megaphone",
+  "description": "Affiche les actualités WordPress synchronisées avec PanneauPocket.",
+  "textdomain": "hpk-panneaupocket",
+  "attributes": {
+    "layout": {
+      "type": "string",
+      "default": "grid"
+    },
+    "limit": {
+      "type": "number",
+      "default": 6
+    },
+    "perPage": {
+      "type": "number",
+      "default": 6
+    },
+    "showDate": {
+      "type": "boolean",
+      "default": true
+    },
+    "showImage": {
+      "type": "boolean",
+      "default": true
+    },
+    "showType": {
+      "type": "boolean",
+      "default": false
+    },
+    "excerptLength": {
+      "type": "number",
+      "default": 120
+    },
+    "pagination": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "editorScript": "hpk-pp-block-news-editor"
+}

@@ -1,0 +1,39 @@
+<?php
+/**
+ * News compact template.
+ *
+ * @package HPK_PanneauPocket
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! $query->have_posts() ) {
+	echo '<p class="hpk-pp-no-news">' . esc_html__( 'Aucune actualité PanneauPocket.', 'hpk-panneaupocket' ) . '</p>';
+	return;
+}
+?>
+<div class="hpk-pp-news hpk-pp-news--compact">
+	<?php while ( $query->have_posts() ) : $query->the_post(); ?>
+		<?php
+		$type     = get_post_meta( get_the_ID(), '_panneaupocket_type', true ) ?: 'info';
+		$pp_title = get_post_meta( get_the_ID(), '_panneaupocket_title', true ) ?: get_the_title();
+		$link     = 'hpk_pp_sign' === get_post_type() ? '' : get_permalink();
+		$tag      = $link ? 'a' : 'div';
+		$href     = $link ? ' href="' . esc_url( $link ) . '"' : '';
+		?>
+		<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- tag is whitelisted. ?><?php echo $href; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> class="hpk-pp-news-compact-item hpk-pp-news-item--<?php echo esc_attr( $type ); ?>">
+			<?php if ( $show_type ) : ?>
+				<span class="hpk-pp-news-type"><?php echo esc_html( strtoupper( $type ) ); ?></span>
+			<?php endif; ?>
+			<span class="hpk-pp-news-title"><?php echo esc_html( $pp_title ); ?></span>
+			<?php if ( $show_date ) : ?>
+				<time class="hpk-pp-news-date"><?php echo esc_html( get_the_date() ); ?></time>
+			<?php endif; ?>
+		</<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	<?php endwhile; ?>
+</div>
+<?php if ( $pagination && $query->max_num_pages > 1 ) : ?>
+	<nav class="hpk-pp-pagination"><?php echo paginate_links( array( 'total' => $query->max_num_pages, 'current' => $paged, 'format' => '?hpk_pp_page=%#%' ) ); ?></nav>
+<?php endif; ?>
