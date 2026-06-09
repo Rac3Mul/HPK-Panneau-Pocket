@@ -131,6 +131,31 @@
 	});
 
 	/* Add document row */
+	function hpkPpDocRowHtml(inputName) {
+		var isPublication = inputName === 'documents[]';
+		var inputClass = isPublication ? 'large-text hpk-pp-doc-url' : 'widefat hpk-pp-doc-url';
+		var mediaLabel = isPublication ? 'Média WP' : 'Média';
+		return '<p class="hpk-pp-doc-row">' +
+			'<input type="url" name="' + inputName + '" value="" class="' + inputClass + '" placeholder="https://" />' +
+			'<button type="button" class="button hpk-pp-media-btn">' + mediaLabel + '</button>' +
+			'<button type="button" class="button hpk-pp-remove-doc" title="Retirer" aria-label="Retirer ce document">&times;</button>' +
+			'</p>';
+	}
+
+	window.hpkPpDocRowHtml = hpkPpDocRowHtml;
+
+	$(document).on('click', '.hpk-pp-remove-doc', function (e) {
+		e.preventDefault();
+		var $docs = $(this).closest('.hpk-pp-documents');
+		var $row = $(this).closest('.hpk-pp-doc-row');
+		if ($docs.find('.hpk-pp-doc-row').length <= 1) {
+			$row.find('.hpk-pp-doc-url').val('').trigger('change');
+		} else {
+			$row.remove();
+		}
+		$(document).trigger('hpk-pp-docs-changed');
+	});
+
 	$(document).on('click', '.hpk-pp-add-doc', function () {
 		var $docs = $(this).closest('.hpk-pp-documents');
 		var count = $docs.find('.hpk-pp-doc-row').length;
@@ -138,10 +163,7 @@
 			return;
 		}
 		var inputName = $docs.data('input-name') || '_panneaupocket_documents[]';
-		$docs.find('.hpk-pp-add-doc').before(
-			'<p class="hpk-pp-doc-row"><input type="url" name="' + inputName + '" value="" class="widefat hpk-pp-doc-url" placeholder="https://" />' +
-			'<button type="button" class="button hpk-pp-media-btn">Média WP</button></p>'
-		);
+		$docs.find('.hpk-pp-add-doc').before(hpkPpDocRowHtml(inputName));
 	});
 
 	/* Logo picker */

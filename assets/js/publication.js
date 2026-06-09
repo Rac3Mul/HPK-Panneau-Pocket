@@ -178,6 +178,20 @@
 		});
 	}
 
+	function syncLibrarySelection() {
+		var urls = [];
+		$('.hpk-pp-publication-form .hpk-pp-doc-url').each(function () {
+			var val = $.trim($(this).val());
+			if (val) {
+				urls.push(val);
+			}
+		});
+		$('.hpk-pp-library-pick').each(function () {
+			var url = $(this).data('url');
+			$(this).toggleClass('is-selected', urls.indexOf(url) !== -1);
+		});
+	}
+
 	function findDocInputForUrl($form) {
 		var $empty = null;
 		$form.find('.hpk-pp-doc-url').each(function () {
@@ -193,10 +207,8 @@
 			return null;
 		}
 		var inputName = $form.find('.hpk-pp-documents').data('input-name') || 'documents[]';
-		var $row = $(
-			'<p class="hpk-pp-doc-row"><input type="url" name="' + inputName + '" value="" class="large-text hpk-pp-doc-url" placeholder="https://" />' +
-			'<button type="button" class="button hpk-pp-media-btn">Média WP</button></p>'
-		);
+		var rowHtml = window.hpkPpDocRowHtml ? window.hpkPpDocRowHtml(inputName) : '';
+		var $row = $(rowHtml);
 		$form.find('.hpk-pp-add-doc').before($row);
 		return $row.find('.hpk-pp-doc-url');
 	}
@@ -209,10 +221,31 @@
 			return;
 		}
 		$input.val(url).trigger('change');
-		$('.hpk-pp-library-pick').removeClass('is-selected');
-		$('.hpk-pp-library-pick').filter(function () {
-			return $(this).data('url') === url;
-		}).addClass('is-selected');
+		syncLibrarySelection();
+	}
+
+	var $libraryZoom = null;
+
+	function ensureLibraryZoom() {
+		if (!$libraryZoom) {
+			$libraryZoom = $('<div class="hpk-pp-library-zoom" aria-hidden="true"><img alt="" /></div>').appendTo('body');
+		}
+		return $libraryZoom;
+	}
+
+	function positionLibraryZoom(e) {
+		var $zoom = ensureLibraryZoom();
+		var w = $zoom.outerWidth();
+		var h = $zoom.outerHeight();
+		var x = e.clientX + 18;
+		var y = e.clientY + 18;
+		if (x + w > window.innerWidth - 12) {
+			x = e.clientX - w - 18;
+		}
+		if (y + h > window.innerHeight - 12) {
+			y = e.clientY - h - 18;
+		}
+		$zoom.css({ left: Math.max(12, x), top: Math.max(12, y) });
 	}
 
 	$(function () {
@@ -222,7 +255,33 @@
 
 		bindEditor();
 
-		$(document).on('input change', '.hpk-pp-publication-form .hpk-pp-preview-title, .hpk-pp-publication-form .hpk-pp-preview-type, .hpk-pp-publication-form .hpk-pp-doc-url', updatePreview);
+		$(document).on('input change', '.hpk-pp-publication-form .hpk-pp-preview-title, .hpk-pp-publication-form .hpk-pp-preview-type, .hpk-pp-publication-form .hpk-pp-doc-url', function () {
+			updatePreview();
+			syncLibrarySelection();
+		});
+
+		$(document).on('hpk-pp-docs-changed', function () {
+			updatePreview();
+			syncLibrarySelection();
+		});
+
+		$(document).on('mouseenter', '.hpk-pp-library-pick', function (e) {
+			var url = $(this).data('url');
+			var $zoom = ensureLibraryZoom();
+			$zoom.find('img').attr('src', url);
+			$zoom.addClass('is-visible');
+			positionLibraryZoom(e);
+		});
+
+		$(document).on('mousemove', '.hpk-pp-library-pick', function (e) {
+			if ($('.hpk-pp-library-zoom.is-visible').length) {
+				positionLibraryZoom(e);
+			}
+		});
+
+		$(document).on('mouseleave', '.hpk-pp-library-pick', function () {
+			$('.hpk-pp-library-zoom').removeClass('is-visible');
+		});
 
 		$(document).on('click', '.hpk-pp-emoji-trigger', function (e) {
 			e.preventDefault();
@@ -251,6 +310,7 @@
 		}
 
 		updatePreview();
+		syncLibrarySelection();
 	});
 
 })(jQuery);

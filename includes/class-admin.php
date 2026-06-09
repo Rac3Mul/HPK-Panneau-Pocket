@@ -788,22 +788,33 @@ class HPK_PP_Admin {
 									</p>
 
 									<?php if ( ! empty( $library ) ) : ?>
-										<div class="hpk-pp-image-library">
-											<h4 class="hpk-pp-image-library__title"><?php esc_html_e( 'Bibliothèque PanneauPocket', 'hpk-panneaupocket' ); ?></h4>
-											<p class="description"><?php esc_html_e( 'Cliquez sur une image pour l\'ajouter aux documents de la publication.', 'hpk-panneaupocket' ); ?></p>
-											<?php foreach ( $library as $category => $images ) : ?>
-												<div class="hpk-pp-image-library__category">
-													<h5 class="hpk-pp-image-library__category-title"><?php echo esc_html( ucwords( str_replace( array( '-', '_' ), ' ', $category ) ) ); ?></h5>
-													<div class="hpk-pp-image-library__grid">
-														<?php foreach ( $images as $image ) : ?>
-															<button type="button" class="hpk-pp-library-pick" data-url="<?php echo esc_url( $image['url'] ); ?>" title="<?php echo esc_attr( $image['name'] ); ?>">
-																<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['name'] ); ?>" loading="lazy" />
-															</button>
-														<?php endforeach; ?>
+										<?php
+										$library_count = 0;
+										foreach ( $library as $images ) {
+											$library_count += count( $images );
+										}
+										?>
+										<details class="hpk-pp-image-library">
+											<summary class="hpk-pp-image-library__toggle">
+												<?php esc_html_e( 'Bibliothèque PanneauPocket', 'hpk-panneaupocket' ); ?>
+												<span class="hpk-pp-image-library__count">(<?php echo esc_html( $library_count ); ?> <?php esc_html_e( 'images', 'hpk-panneaupocket' ); ?>)</span>
+											</summary>
+											<div class="hpk-pp-image-library__body">
+												<p class="description"><?php esc_html_e( 'Survolez une miniature pour l\'agrandir. Cliquez pour l\'ajouter aux documents.', 'hpk-panneaupocket' ); ?></p>
+												<?php foreach ( $library as $category => $images ) : ?>
+													<div class="hpk-pp-image-library__category">
+														<h5 class="hpk-pp-image-library__category-title"><?php echo esc_html( ucwords( str_replace( array( '-', '_' ), ' ', $category ) ) ); ?></h5>
+														<div class="hpk-pp-image-library__grid">
+															<?php foreach ( $images as $image ) : ?>
+																<button type="button" class="hpk-pp-library-pick" data-url="<?php echo esc_url( $image['url'] ); ?>" title="<?php echo esc_attr( $image['name'] ); ?>">
+																	<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['name'] ); ?>" loading="lazy" />
+																</button>
+															<?php endforeach; ?>
+														</div>
 													</div>
-												</div>
-											<?php endforeach; ?>
-										</div>
+												<?php endforeach; ?>
+											</div>
+										</details>
 									<?php endif; ?>
 
 									<div class="hpk-pp-documents" data-input-name="documents[]">
@@ -811,6 +822,7 @@ class HPK_PP_Admin {
 											<p class="hpk-pp-doc-row">
 												<input type="url" name="documents[]" value="<?php echo esc_url( $doc ); ?>" class="large-text hpk-pp-doc-url" placeholder="https://" />
 												<button type="button" class="button hpk-pp-media-btn"><?php esc_html_e( 'Média WP', 'hpk-panneaupocket' ); ?></button>
+												<button type="button" class="button hpk-pp-remove-doc" title="<?php esc_attr_e( 'Retirer', 'hpk-panneaupocket' ); ?>" aria-label="<?php esc_attr_e( 'Retirer ce document', 'hpk-panneaupocket' ); ?>">&times;</button>
 											</p>
 										<?php endforeach; ?>
 										<button type="button" class="button hpk-pp-add-doc"><?php esc_html_e( 'Ajouter un fichier', 'hpk-panneaupocket' ); ?></button>

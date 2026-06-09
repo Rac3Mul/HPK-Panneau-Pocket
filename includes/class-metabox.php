@@ -177,8 +177,9 @@ class HPK_PP_Metabox {
 				<label><?php esc_html_e( 'Documents supplémentaires (max 5, jpg/png/pdf)', 'hpk-panneaupocket' ); ?></label>
 				<?php foreach ( $documents as $i => $doc ) : ?>
 					<p class="hpk-pp-doc-row">
-						<input type="url" name="_panneaupocket_documents[]" value="<?php echo esc_url( $doc ); ?>" class="widefat" placeholder="https://" />
+						<input type="url" name="_panneaupocket_documents[]" value="<?php echo esc_url( $doc ); ?>" class="widefat hpk-pp-doc-url" placeholder="https://" />
 						<button type="button" class="button hpk-pp-media-btn"><?php esc_html_e( 'Média', 'hpk-panneaupocket' ); ?></button>
+						<button type="button" class="button hpk-pp-remove-doc" title="<?php esc_attr_e( 'Retirer', 'hpk-panneaupocket' ); ?>" aria-label="<?php esc_attr_e( 'Retirer ce document', 'hpk-panneaupocket' ); ?>">&times;</button>
 					</p>
 				<?php endforeach; ?>
 				<button type="button" class="button hpk-pp-add-doc"><?php esc_html_e( 'Ajouter un document', 'hpk-panneaupocket' ); ?></button>
