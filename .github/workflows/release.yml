@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,11 +18,12 @@ jobs:
 
       - name: Build plugin zip
         run: |
+          set -e
+          ZIP="hpk-panneaupocket.zip"
+          rm -f "$ZIP"
+
           if [ -f "hpk-panneaupocket/hpk-panneaupocket.php" ]; then
-            cd hpk-panneaupocket
-            zip -r ../hpk-panneaupocket.zip . \
-              -x "*.git*" \
-              -x ".github/*"
+            (cd hpk-panneaupocket && zip -r "../${ZIP}" . -x "*.git*" -x ".github/*")
           elif [ -f "hpk-panneaupocket.php" ]; then
             mkdir -p build/hpk-panneaupocket
             rsync -a \
@@ -30,14 +32,14 @@ jobs:
               --exclude build \
               --exclude hpk-panneaupocket.zip \
               ./ build/hpk-panneaupocket/
-            cd build
-            zip -r ../hpk-panneaupocket.zip hpk-panneaupocket
+            (cd build && zip -r "../${ZIP}" hpk-panneaupocket)
           else
             echo "Plugin main file not found."
             exit 1
           fi
-          ls -la hpk-panneaupocket.zip
-          unzip -l hpk-panneaupocket.zip | head -20
+
+          ls -la "$ZIP"
+          unzip -l "$ZIP" | head -20
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
