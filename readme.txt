@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,13 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.2.5 =
+* Logo PanneauPocket officiel (widget + aperçu admin)
+* Bibliothèque d'images intégrée (assets/img/base, sous-dossiers)
+* Avertissement droits d'auteur sur les images
+* Emojis dans le titre et le contenu
+* Images visibles dans l'aperçu mobile (contenu + documents)
 
 = 1.2.4 =
 * Page Publication : éditeur visuel (gras, italique, liens…)

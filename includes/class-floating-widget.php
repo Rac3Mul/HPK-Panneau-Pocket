@@ -191,7 +191,7 @@ class HPK_PP_Floating_Widget {
 			)
 		);
 
-		$logo = HPK_PP_URL . 'assets/img/logo-panneaupocket.svg';
+		$logo = HPK_PP_Image_Library::get_default_logo_url();
 		if ( '1' === get_option( 'hpk_pp_use_custom_logo' ) ) {
 			$custom = get_option( 'hpk_pp_custom_logo', '' );
 			if ( $custom ) {

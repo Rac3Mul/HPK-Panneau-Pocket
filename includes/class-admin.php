@@ -296,6 +296,8 @@ class HPK_PP_Admin {
 					'editorId'      => 'hpk_pp_publication_content',
 					'communityName' => get_bloginfo( 'name' ),
 					'cityId'        => get_option( 'hpk_pp_city_id', '' ),
+					'logoUrl'       => HPK_PP_Image_Library::get_default_logo_url(),
+					'emojis'        => array( '😀', '😊', '👍', '❤️', '🎉', '📅', '📢', '⚠️', '🚧', '🏛️', '🎭', '🎵', '🏃', '🚗', '🚌', '🌳', '🌞', '🌧️', '❄️', '🔥', '💧', '📍', '🕐', '✅', '❌', '🎁', '🍽️', '👨‍👩‍👧', '📞', '✉️' ),
 					'i18n'          => array(
 						'previewTitle'       => __( 'Aperçu PanneauPocket', 'hpk-panneaupocket' ),
 						'placeholderTitle'   => __( 'Écrivez le titre', 'hpk-panneaupocket' ),
@@ -711,6 +713,8 @@ class HPK_PP_Admin {
 			$docs = array( '' );
 		}
 		$title_len = function_exists( 'mb_strlen' ) ? mb_strlen( $title ) : strlen( $title );
+		$logo_url  = HPK_PP_Image_Library::get_default_logo_url();
+		$library   = HPK_PP_Image_Library::get_base_library();
 		?>
 		<div class="wrap hpk-pp-admin hpk-pp-publication">
 			<h1><?php esc_html_e( 'PanneauPocket — Publication', 'hpk-panneaupocket' ); ?></h1>
@@ -727,7 +731,10 @@ class HPK_PP_Admin {
 							<tr>
 								<th><?php esc_html_e( 'Titre (max 50)', 'hpk-panneaupocket' ); ?></th>
 								<td>
-									<input type="text" name="title" value="<?php echo esc_attr( $title ); ?>" maxlength="50" class="regular-text hpk-pp-title-input hpk-pp-preview-title" required />
+									<div class="hpk-pp-title-row">
+										<input type="text" name="title" value="<?php echo esc_attr( $title ); ?>" maxlength="50" class="regular-text hpk-pp-title-input hpk-pp-preview-title" required />
+										<button type="button" class="button hpk-pp-emoji-trigger" data-target=".hpk-pp-preview-title" aria-label="<?php esc_attr_e( 'Insérer un emoji dans le titre', 'hpk-panneaupocket' ); ?>">😊</button>
+									</div>
 									<span class="hpk-pp-char-count"><span class="hpk-pp-char-current"><?php echo esc_html( $title_len ); ?></span>/50</span>
 								</td>
 							</tr>
@@ -745,7 +752,12 @@ class HPK_PP_Admin {
 							<tr>
 								<th><?php esc_html_e( 'Contenu', 'hpk-panneaupocket' ); ?></th>
 								<td>
-									<p class="description"><?php esc_html_e( 'Utilisez la barre d\'outils (gras, italique, liens…) — pas besoin d\'écrire du HTML à la main.', 'hpk-panneaupocket' ); ?></p>
+									<p class="description"><?php esc_html_e( 'Utilisez la barre d\'outils (gras, italique, liens…) ou le bouton emoji — pas besoin d\'écrire du HTML à la main.', 'hpk-panneaupocket' ); ?></p>
+									<p>
+										<button type="button" class="button hpk-pp-emoji-trigger" data-target-editor="<?php echo esc_attr( 'hpk_pp_publication_content' ); ?>">
+											<?php esc_html_e( 'Insérer un emoji', 'hpk-panneaupocket' ); ?>
+										</button>
+									</p>
 									<?php
 									wp_editor(
 										$content,
@@ -768,17 +780,37 @@ class HPK_PP_Admin {
 							<tr>
 								<th><?php esc_html_e( 'Images & documents', 'hpk-panneaupocket' ); ?></th>
 								<td>
+									<div class="hpk-pp-copyright-warning" role="note">
+										<?php esc_html_e( 'Utiliser des images en ligne peut entraîner des risques juridiques et des amendes si vous n\'avez pas les droits d\'auteur. Préférez notre banque d\'images dédiée ci-dessous ou la médiathèque WordPress.', 'hpk-panneaupocket' ); ?>
+									</div>
 									<p class="description">
-										<?php esc_html_e( 'Jusqu\'à 5 fichiers (jpg, png ou pdf, 15 Mo max). L\'API PanneauPocket attend une URL publique — choisissez depuis la médiathèque WordPress.', 'hpk-panneaupocket' ); ?>
+										<?php esc_html_e( 'Jusqu\'à 5 fichiers (jpg, png ou pdf, 15 Mo max). L\'API PanneauPocket télécharge le fichier depuis l\'URL publique.', 'hpk-panneaupocket' ); ?>
 									</p>
-									<p class="description">
-										<?php esc_html_e( 'La banque d\'images officielle PanneauPocket n\'est pas exposée dans l\'API publique : utilisez gestion.panneaupocket.com pour ces visuels, ou uploadez ici.', 'hpk-panneaupocket' ); ?>
-									</p>
+
+									<?php if ( ! empty( $library ) ) : ?>
+										<div class="hpk-pp-image-library">
+											<h4 class="hpk-pp-image-library__title"><?php esc_html_e( 'Bibliothèque PanneauPocket', 'hpk-panneaupocket' ); ?></h4>
+											<p class="description"><?php esc_html_e( 'Cliquez sur une image pour l\'ajouter aux documents de la publication.', 'hpk-panneaupocket' ); ?></p>
+											<?php foreach ( $library as $category => $images ) : ?>
+												<div class="hpk-pp-image-library__category">
+													<h5 class="hpk-pp-image-library__category-title"><?php echo esc_html( ucwords( str_replace( array( '-', '_' ), ' ', $category ) ) ); ?></h5>
+													<div class="hpk-pp-image-library__grid">
+														<?php foreach ( $images as $image ) : ?>
+															<button type="button" class="hpk-pp-library-pick" data-url="<?php echo esc_url( $image['url'] ); ?>" title="<?php echo esc_attr( $image['name'] ); ?>">
+																<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['name'] ); ?>" loading="lazy" />
+															</button>
+														<?php endforeach; ?>
+													</div>
+												</div>
+											<?php endforeach; ?>
+										</div>
+									<?php endif; ?>
+
 									<div class="hpk-pp-documents" data-input-name="documents[]">
 										<?php foreach ( $docs as $doc ) : ?>
 											<p class="hpk-pp-doc-row">
 												<input type="url" name="documents[]" value="<?php echo esc_url( $doc ); ?>" class="large-text hpk-pp-doc-url" placeholder="https://" />
-												<button type="button" class="button hpk-pp-media-btn"><?php esc_html_e( 'Média', 'hpk-panneaupocket' ); ?></button>
+												<button type="button" class="button hpk-pp-media-btn"><?php esc_html_e( 'Média WP', 'hpk-panneaupocket' ); ?></button>
 											</p>
 										<?php endforeach; ?>
 										<button type="button" class="button hpk-pp-add-doc"><?php esc_html_e( 'Ajouter un fichier', 'hpk-panneaupocket' ); ?></button>
@@ -813,18 +845,25 @@ class HPK_PP_Admin {
 									<span class="hpk-pp-phone-preview__city-id"><?php echo esc_html( get_option( 'hpk_pp_city_id', '' ) ); ?></span>
 								<?php endif; ?>
 							</div>
-							<div class="hpk-pp-phone-preview__logo" aria-hidden="true"></div>
+							<div class="hpk-pp-phone-preview__logo-wrap">
+								<img src="<?php echo esc_url( $logo_url ); ?>" alt="PanneauPocket" class="hpk-pp-phone-preview__logo-img" width="44" height="44" />
+								<span class="hpk-pp-phone-preview__logo-badge" aria-hidden="true">1</span>
+							</div>
 						</div>
-						<div class="hpk-pp-phone-preview__badge hpk-pp-preview-type-badge"><?php esc_html_e( 'Information', 'hpk-panneaupocket' ); ?></div>
-						<div class="hpk-pp-phone-preview__title hpk-pp-preview-title-display"><?php echo $title ? esc_html( $title ) : esc_html__( 'Écrivez le titre', 'hpk-panneaupocket' ); ?></div>
-						<div class="hpk-pp-phone-preview__content hpk-pp-preview-content-display">
-							<?php if ( $content ) : ?>
-								<?php echo wp_kses_post( $content ); ?>
-							<?php else : ?>
-								<p class="hpk-pp-phone-preview__placeholder"><?php esc_html_e( 'Votre message apparaîtra ici…', 'hpk-panneaupocket' ); ?></p>
-							<?php endif; ?>
+						<div class="hpk-pp-phone-preview__body">
+							<div class="hpk-pp-phone-preview__badge hpk-pp-preview-type-badge"><?php esc_html_e( 'Information', 'hpk-panneaupocket' ); ?></div>
+							<div class="hpk-pp-phone-preview__title hpk-pp-preview-title-display"><?php echo $title ? esc_html( $title ) : esc_html__( 'Écrivez le titre', 'hpk-panneaupocket' ); ?></div>
+							<div class="hpk-pp-phone-preview__scroll">
+								<div class="hpk-pp-phone-preview__content hpk-pp-preview-content-display">
+									<?php if ( $content ) : ?>
+										<?php echo wp_kses_post( $content ); ?>
+									<?php else : ?>
+										<p class="hpk-pp-phone-preview__placeholder"><?php esc_html_e( 'Votre message apparaîtra ici…', 'hpk-panneaupocket' ); ?></p>
+									<?php endif; ?>
+								</div>
+								<div class="hpk-pp-phone-preview__docs hpk-pp-preview-docs-display"></div>
+							</div>
 						</div>
-						<div class="hpk-pp-phone-preview__docs hpk-pp-preview-docs-display"></div>
 					</div>
 				</aside>
 			</div>

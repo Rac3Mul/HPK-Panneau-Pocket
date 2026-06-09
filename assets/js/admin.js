@@ -140,7 +140,7 @@
 		var inputName = $docs.data('input-name') || '_panneaupocket_documents[]';
 		$docs.find('.hpk-pp-add-doc').before(
 			'<p class="hpk-pp-doc-row"><input type="url" name="' + inputName + '" value="" class="widefat hpk-pp-doc-url" placeholder="https://" />' +
-			'<button type="button" class="button hpk-pp-media-btn">Média</button></p>'
+			'<button type="button" class="button hpk-pp-media-btn">Média WP</button></p>'
 		);
 	});
 
