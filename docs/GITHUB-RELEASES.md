@@ -1,47 +1,49 @@
 # Mises à jour GitHub — HPK PanneauPocket Connect
 
-## Configuration du dépôt (une fois)
+Dépôt : https://github.com/Rac3Mul/HPK-Panneau-Pocket
 
-1. Créez un repo GitHub : `https://github.com/Rac3Mul/HPK-Panneau-Pocket`
-2. Poussez le contenu du dossier `hpk-panneaupocket/`
-3. Branche par défaut : `main`
+## Releases automatiques (GitHub Actions)
 
-### Repo public (recommandé)
+À chaque tag `v*`, GitHub Actions :
+1. Construit `hpk-panneaupocket.zip`
+2. Publie la Release avec le zip attaché
+3. WordPress détecte la MAJ automatiquement
 
-Aucune configuration sur le site WordPress : le plugin interroge GitHub automatiquement.
+### Publier une nouvelle version
 
-URL du dépôt (déjà configurée dans le plugin) :
-`https://github.com/Rac3Mul/HPK-Panneau-Pocket/`
+```bash
+# 1. Incrémenter Version dans hpk-panneaupocket.php + readme.txt (Stable tag, changelog)
+git add .
+git commit -m "v1.2.4"
+git push origin main
 
-### Repo privé (optionnel)
-
-Dans `wp-config.php` sur chaque site client :
-
-```php
-define( 'HPK_PP_GITHUB_TOKEN', 'ghp_xxxxxxxxxxxxxxxxxxxx' );
+# 2. Créer et pousser le tag (déclenche la release auto)
+git tag v1.2.4
+git push origin v1.2.4
 ```
 
-Créez un token GitHub (Settings → Developer settings → Personal access tokens) avec `repo`.
+Attendre 1–2 minutes → vérifier **Releases** sur GitHub → le zip doit être attaché.
 
-## Publier une nouvelle version
+### Côté WordPress
 
-1. Incrémentez la version dans `hpk-panneaupocket.php` (en-tête `Version:` et `HPK_PP_VERSION`)
-2. Mettez à jour `Stable tag:` et le changelog dans `readme.txt`
-3. Générez le zip (structure : `hpk-panneaupocket/hpk-panneaupocket.php` à la racine du zip)
-4. Commit + push sur `main`
-5. GitHub → **Releases** → **Draft a new release**
-   - Tag : `v1.2.0` (ou `1.2.0`)
-   - Titre : `Version 1.2.0`
-   - **Attachez** `hpk-panneaupocket.zip` en fichier binaire
-   - Ne cochez **pas** « Pre-release »
-6. Publiez la release
-
-## Côté WordPress (client)
-
-- **Extensions** → notification « Une nouvelle version est disponible »
+- **Tableau de bord → Mises à jour** ou **Extensions**
 - Cliquez **Mettre à jour maintenant**
-- Les réglages (token, City ID) sont **conservés**
+- Réglages (token, City ID) conservés
 
-## Mise à jour manuelle (sans GitHub)
+## Repo public
 
-Remplacez les fichiers dans `wp-content/plugins/hpk-panneaupocket/` via cPanel sans désactiver le plugin.
+Aucune config sur le site. URL par défaut dans le plugin :
+`https://github.com/Rac3Mul/HPK-Panneau-Pocket/`
+
+## Repo privé (optionnel)
+
+Dans `wp-config.php` :
+```php
+define( 'HPK_PP_GITHUB_TOKEN', 'ghp_xxxxxxxx' );
+```
+
+## Compatibilité WordPress
+
+Déclarée dans `readme.txt` et l'en-tête du plugin :
+- **Requires at least:** 6.0
+- **Tested up to:** 7.0 (couvre 6.9.x et 7.0)

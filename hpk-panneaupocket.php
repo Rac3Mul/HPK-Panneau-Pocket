@@ -3,8 +3,9 @@
  * Plugin Name:       HPK PanneauPocket Connect
  * Plugin URI:        https://panneaupocket.com
  * Description:       Intégration PanneauPocket : widget flottant, shortcodes, publication d'actualités WordPress vers l'API officielle.
- * Version:           1.2.2
+ * Version:           1.2.3
  * Requires at least: 6.0
+ * Tested up to:      7.0
  * Requires PHP:      7.4
  * Author:            HPK
  * License:           GPL-2.0-or-later
@@ -18,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'HPK_PP_LOADED_FROM', __FILE__ );
-define( 'HPK_PP_VERSION', '1.2.2' );
+define( 'HPK_PP_VERSION', '1.2.3' );
 define( 'HPK_PP_CANONICAL_BASENAME', 'hpk-panneaupocket/hpk-panneaupocket.php' );
 define( 'HPK_PP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HPK_PP_URL', plugin_dir_url( __FILE__ ) );
@@ -160,7 +161,6 @@ final class HPK_PanneauPocket {
 		);
 
 		if ( is_admin() ) {
-			add_action( 'admin_notices', array( $this, 'maybe_show_boot_notice' ) );
 			register_shutdown_function( array( $this, 'catch_fatal_error' ) );
 		}
 	}
@@ -176,29 +176,6 @@ final class HPK_PanneauPocket {
 			$links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=hpk-pp-settings' ) ) . '">' . esc_html__( 'Réglages', 'hpk-panneaupocket' ) . '</a>';
 		}
 		return $links;
-	}
-
-	/**
-	 * Show bootstrap diagnostics for administrators.
-	 */
-	public function maybe_show_boot_notice() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( $screen && 'plugins' !== $screen->id ) {
-			return;
-		}
-
-		echo '<div class="notice notice-info"><p><strong>HPK PanneauPocket Connect</strong> — ';
-		printf(
-			/* translators: 1: version, 2: file path */
-			esc_html__( 'Version chargée : %1$s — Fichier : %2$s', 'hpk-panneaupocket' ),
-			esc_html( HPK_PP_VERSION ),
-			esc_html( HPK_PP_LOADED_FROM )
-		);
-		echo '</p></div>';
 	}
 
 	/**
