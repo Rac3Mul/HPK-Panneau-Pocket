@@ -219,7 +219,7 @@ class HPK_PP_Admin_UI {
 	 */
 	public static function render_logo_preview_panel() {
 		$logo_url   = self::get_active_logo_url();
-		$btn_color  = get_option( 'hpk_pp_color_button', '#0066cc' );
+		$btn_color  = get_option( 'hpk_pp_color_button', '#ffffff' );
 		$primary    = get_option( 'hpk_pp_color_primary', '#0066cc' );
 		$use_custom = get_option( 'hpk_pp_use_custom_logo', '' );
 		?>

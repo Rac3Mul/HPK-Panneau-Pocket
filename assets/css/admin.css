@@ -854,6 +854,18 @@
 	margin: 0 0 0.75em;
 }
 
+.hpk-pp-phone-preview__content br {
+	display: block;
+	margin-bottom: 0.35em;
+	content: '';
+}
+
+.hpk-pp-phone-preview__content ul,
+.hpk-pp-phone-preview__content ol {
+	margin: 0 0 0.75em 1.2em;
+	padding: 0;
+}
+
 .hpk-pp-phone-preview__content p:last-child {
 	margin-bottom: 0;
 }

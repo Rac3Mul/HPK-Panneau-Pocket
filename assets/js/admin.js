@@ -195,7 +195,7 @@
 		var useCustom = $('input[name="hpk_pp_use_custom_logo"]').is(':checked');
 		var customUrl = $('#hpk_pp_custom_logo').val();
 		var logoUrl = useCustom && customUrl ? customUrl : defaultLogo;
-		var btnColor = $('input[name="hpk_pp_color_button"]').val() || '#0066cc';
+		var btnColor = $('input[name="hpk_pp_color_button"]').val() || '#ffffff';
 		var primary = $('input[name="hpk_pp_color_primary"]').val() || '#0066cc';
 
 		$wrap.find('.hpk-pp-logo-preview__btn').css('background', btnColor);

@@ -25,6 +25,9 @@ class HPK_PP_Sanitizer {
 			'br'     => array(),
 			'strong' => array(),
 			'em'     => array(),
+			'u'      => array(),
+			's'      => array(),
+			'del'    => array(),
 			'ul'     => array(),
 			'ol'     => array(),
 			'li'     => array(),
@@ -90,6 +93,41 @@ class HPK_PP_Sanitizer {
 		$content = preg_replace( '/<(script|iframe|video|audio|form|embed|object)[^>]*>.*?<\/\1>/is', '', $content );
 		$content = preg_replace( '/<(script|iframe|video|audio|form|embed|object)[^>]*\/?>/i', '', $content );
 		$content = wp_kses( $content, self::allowed_html() );
+		$content = self::normalize_content_line_breaks( $content );
+
+		return trim( $content );
+	}
+
+	/**
+	 * Convert block markup to <br> for PanneauPocket (API expects br, not p/div).
+	 *
+	 * @param string $content HTML content.
+	 * @return string
+	 */
+	public static function normalize_content_line_breaks( $content ) {
+		if ( '' === trim( $content ) ) {
+			return '';
+		}
+
+		// Headings -> bold line + break.
+		$content = preg_replace( '/<h([23])(?:\s[^>]*)?>(.*?)<\/h\1>/is', '<strong>$2</strong><br>', $content );
+
+		// Block elements from TinyMCE / wpautop -> line breaks.
+		$content = preg_replace( '/<\/p>\s*<p(?:\s[^>]*)?>/i', '<br>', $content );
+		$content = preg_replace( '/<\/div>\s*<div(?:\s[^>]*)?>/i', '<br>', $content );
+		$content = preg_replace( '/<p(?:\s[^>]*)?>/i', '', $content );
+		$content = preg_replace( '/<\/p>/i', '<br>', $content );
+		$content = preg_replace( '/<div(?:\s[^>]*)?>/i', '', $content );
+		$content = preg_replace( '/<\/div>/i', '<br>', $content );
+
+		// Text mode or pasted plain text with newlines.
+		if ( false !== strpos( $content, "\n" ) && ! preg_match( '/<(br|ul|ol|li)\b/i', $content ) ) {
+			$content = nl2br( $content );
+		}
+
+		$content = preg_replace( '/(?:<br\s*\/?>\s*){3,}/i', '<br><br>', $content );
+		$content = preg_replace( '/(?:<br\s*\/?>\s*)+$/i', '', $content );
+
 		return trim( $content );
 	}
 

@@ -47,6 +47,23 @@
 		return urls;
 	}
 
+	function normalizeContentForPreview(html) {
+		if (!html) {
+			return html;
+		}
+		var out = html;
+		out = out.replace(/<h[23][^>]*>(.*?)<\/h[23]>/gi, '<strong>$1</strong><br>');
+		out = out.replace(/<\/p>\s*<p[^>]*>/gi, '<br>');
+		out = out.replace(/<p[^>]*>/gi, '');
+		out = out.replace(/<\/p>/gi, '<br>');
+		out = out.replace(/<\/div>\s*<div[^>]*>/gi, '<br>');
+		out = out.replace(/<div[^>]*>/gi, '');
+		out = out.replace(/<\/div>/gi, '<br>');
+		out = out.replace(/(?:<br\s*\/?>\s*){3,}/gi, '<br><br>');
+		out = out.replace(/(?:<br\s*\/?>\s*)+$/i, '');
+		return out;
+	}
+
 	function updatePreview() {
 		var $form = $('.hpk-pp-publication-form');
 		if (!$form.length) {
@@ -64,7 +81,7 @@
 
 		var $contentDisplay = $('.hpk-pp-preview-content-display');
 		if (hasHtmlContent(content)) {
-			$contentDisplay.html(content);
+			$contentDisplay.html(normalizeContentForPreview(content));
 		} else {
 			$contentDisplay.html('<p class="hpk-pp-phone-preview__placeholder">' + (i18n.placeholderContent || 'Votre message apparaîtra ici…') + '</p>');
 		}
@@ -311,6 +328,12 @@
 
 		updatePreview();
 		syncLibrarySelection();
+
+		$(document).on('submit', '.hpk-pp-publication-form', function () {
+			if (typeof tinymce !== 'undefined') {
+				tinymce.triggerSave();
+			}
+		});
 	});
 
 })(jQuery);

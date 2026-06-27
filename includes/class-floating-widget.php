@@ -68,7 +68,7 @@ class HPK_PP_Floating_Widget {
 		$height   = get_option( 'hpk_pp_floating_height', '518' );
 		$w_mobile = get_option( 'hpk_pp_floating_width_mobile', '92vw' );
 		$h_mobile = get_option( 'hpk_pp_floating_height_mobile', '75vh' );
-		$btn_color = get_option( 'hpk_pp_color_button', '#0066cc' );
+		$btn_color = get_option( 'hpk_pp_color_button', '#ffffff' );
 		$animations = '1' === get_option( 'hpk_pp_animations', '1' );
 
 		if ( '' === (string) $width ) {

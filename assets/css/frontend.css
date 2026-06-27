@@ -6,7 +6,7 @@
 	--hpk-pp-primary: #0066cc;
 	--hpk-pp-secondary: #004499;
 	--hpk-pp-text: #333333;
-	--hpk-pp-button: #0066cc;
+	--hpk-pp-button: #ffffff;
 }
 
 /* Floating widget */
@@ -35,7 +35,7 @@
 	height: 56px;
 	border: none;
 	border-radius: 50%;
-	background: var(--hpk-pp-button, #0066cc);
+	background: var(--hpk-pp-button, #ffffff);
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 	cursor: pointer;
 	transition: transform 0.2s ease, box-shadow 0.2s ease;

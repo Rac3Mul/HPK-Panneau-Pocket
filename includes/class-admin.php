@@ -548,7 +548,7 @@ class HPK_PP_Admin {
 				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_primary', __( 'Couleur principale', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_primary', '#0066cc' ), __( 'Liens et accents des blocs actualités.', 'hpk-panneaupocket' ) );
 				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_secondary', __( 'Couleur secondaire', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_secondary', '#004499' ) );
 				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_text', __( 'Couleur du texte', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_text', '#333333' ) );
-				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_button', __( 'Couleur du bouton flottant', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_button', '#0066cc' ), __( 'Fond du bouton rond en bas de page.', 'hpk-panneaupocket' ) );
+				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_button', __( 'Couleur du bouton flottant', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_button', '#ffffff' ), __( 'Fond du bouton rond en bas de page.', 'hpk-panneaupocket' ) );
 				?>
 				<?php HPK_PP_Admin_UI::fields_close(); ?>
 				<?php HPK_PP_Admin_UI::card_close(); ?>

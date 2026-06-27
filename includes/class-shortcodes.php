@@ -64,7 +64,7 @@ class HPK_PP_Shortcodes {
 			esc_attr( get_option( 'hpk_pp_color_primary', '#0066cc' ) ),
 			esc_attr( get_option( 'hpk_pp_color_secondary', '#004499' ) ),
 			esc_attr( get_option( 'hpk_pp_color_text', '#333333' ) ),
-			esc_attr( get_option( 'hpk_pp_color_button', '#0066cc' ) )
+			esc_attr( get_option( 'hpk_pp_color_button', '#ffffff' ) )
 		);
 		wp_add_inline_style( 'hpk-pp-frontend', $css );
 	}
