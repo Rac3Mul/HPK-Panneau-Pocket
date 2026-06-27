@@ -83,6 +83,28 @@ class HPK_PP_Sanitizer {
 	}
 
 	/**
+	 * Sanitize WordPress category term IDs.
+	 *
+	 * @param mixed $ids Category IDs.
+	 * @return int[]
+	 */
+	public static function sanitize_category_ids( $ids ) {
+		if ( ! is_array( $ids ) ) {
+			return array();
+		}
+
+		$clean = array();
+		foreach ( $ids as $id ) {
+			$id = absint( $id );
+			if ( $id && term_exists( $id, 'category' ) ) {
+				$clean[] = $id;
+			}
+		}
+
+		return array_values( array_unique( $clean ) );
+	}
+
+	/**
 	 * Clean HTML content for API.
 	 *
 	 * @param string $content Raw content.

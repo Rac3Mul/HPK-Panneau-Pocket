@@ -369,6 +369,14 @@
 				tinymce.triggerSave();
 			}
 		});
+
+		function toggleWpCategoryWrap() {
+			var show = $('.hpk-pp-create-wp-post').is(':checked');
+			$('.hpk-pp-wp-category-wrap').prop('hidden', !show);
+		}
+
+		$(document).on('change', '.hpk-pp-create-wp-post', toggleWpCategoryWrap);
+		toggleWpCategoryWrap();
 	});
 
 })(jQuery);

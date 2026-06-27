@@ -295,6 +295,14 @@ class HPK_PP_Document_Display {
 
 		self::maybe_set_featured_image( $wp_post_id, $docs, ! empty( $form['featured_from_doc'] ) );
 
+		if ( isset( $form['wp_post_categories'] ) ) {
+			$categories = HPK_PP_Sanitizer::sanitize_category_ids( $form['wp_post_categories'] );
+			if ( ! empty( $categories ) ) {
+				wp_set_post_categories( $wp_post_id, $categories, false );
+				update_post_meta( $sign_id, '_panneaupocket_wp_categories', $categories );
+			}
+		}
+
 		return $wp_post_id;
 	}
 

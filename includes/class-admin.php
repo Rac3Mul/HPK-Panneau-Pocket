@@ -391,6 +391,7 @@ class HPK_PP_Admin {
 			'featured_from_doc'         => ! empty( $_POST['featured_from_doc'] ),
 			'show_documents_in_article' => ! empty( $_POST['show_documents_in_article'] ),
 			'documents'                 => isset( $_POST['documents'] ) ? array_map( 'esc_url_raw', wp_unslash( (array) $_POST['documents'] ) ) : array(),
+			'wp_post_categories'        => isset( $_POST['wp_post_categories'] ) ? array_map( 'absint', wp_unslash( (array) $_POST['wp_post_categories'] ) ) : array(),
 		);
 
 		$action  = sanitize_text_field( wp_unslash( $_POST['pub_action'] ?? 'create' ) );
@@ -764,6 +765,29 @@ class HPK_PP_Admin {
 		if ( '' === $show_docs_in_article ) {
 			$show_docs_in_article = '1';
 		}
+
+		$wp_post_categories = array();
+		if ( $linked_wp_post_id ) {
+			$wp_post_categories = wp_get_post_categories( $linked_wp_post_id );
+		} elseif ( $sign_id ) {
+			$stored_cats = get_post_meta( $sign_id, '_panneaupocket_wp_categories', true );
+			if ( is_array( $stored_cats ) ) {
+				$wp_post_categories = array_map( 'absint', $stored_cats );
+			}
+		}
+		if ( empty( $wp_post_categories ) ) {
+			$default_cat = absint( get_option( 'default_category' ) );
+			if ( $default_cat ) {
+				$wp_post_categories = array( $default_cat );
+			}
+		}
+		$wp_categories = get_categories(
+			array(
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
 		?>
 		<div class="wrap hpk-pp-admin hpk-pp-publication">
 			<?php
@@ -887,10 +911,37 @@ class HPK_PP_Admin {
 								<th><?php esc_html_e( 'Options', 'hpk-panneaupocket' ); ?></th>
 								<td>
 									<label><input type="checkbox" name="draft_mode" value="1" /> <?php esc_html_e( 'Préparer sans envoyer', 'hpk-panneaupocket' ); ?></label><br />
-									<label><input type="checkbox" name="create_wp_post" value="1" <?php checked( $linked_wp_post_id > 0 ); ?> /> <?php esc_html_e( 'Créer / mettre à jour l\'article WordPress public', 'hpk-panneaupocket' ); ?></label>
+									<label><input type="checkbox" name="create_wp_post" value="1" class="hpk-pp-create-wp-post" <?php checked( $linked_wp_post_id > 0 ); ?> /> <?php esc_html_e( 'Créer / mettre à jour l\'article WordPress public', 'hpk-panneaupocket' ); ?></label>
 									<?php if ( $linked_wp_post_id ) : ?>
 										<span class="description"> — <a href="<?php echo esc_url( get_edit_post_link( $linked_wp_post_id, 'raw' ) ); ?>"><?php esc_html_e( 'Modifier l\'article', 'hpk-panneaupocket' ); ?></a></span>
 									<?php endif; ?>
+									<div class="hpk-pp-wp-category-wrap" <?php echo ( $linked_wp_post_id > 0 ) ? '' : ' hidden'; ?>>
+										<p class="hpk-pp-wp-category-wrap__label"><?php esc_html_e( 'Catégories WordPress', 'hpk-panneaupocket' ); ?></p>
+										<?php if ( ! empty( $wp_categories ) ) : ?>
+											<div class="hpk-pp-wp-category-list">
+												<?php
+												$categories_by_id = array();
+												foreach ( $wp_categories as $category ) {
+													$categories_by_id[ $category->term_id ] = $category;
+												}
+												foreach ( $wp_categories as $category ) :
+													$depth = 0;
+													$parent_id = (int) $category->parent;
+													while ( $parent_id && isset( $categories_by_id[ $parent_id ] ) ) {
+														++$depth;
+														$parent_id = (int) $categories_by_id[ $parent_id ]->parent;
+													}
+													?>
+													<label class="hpk-pp-wp-category-item" style="padding-left:<?php echo esc_attr( (string) ( $depth * 16 ) ); ?>px">
+														<input type="checkbox" name="wp_post_categories[]" value="<?php echo esc_attr( $category->term_id ); ?>" <?php checked( in_array( (int) $category->term_id, $wp_post_categories, true ) ); ?> />
+														<?php echo esc_html( $category->name ); ?>
+													</label>
+												<?php endforeach; ?>
+											</div>
+										<?php else : ?>
+											<p class="description"><?php esc_html_e( 'Aucune catégorie disponible. Créez-en une dans Articles → Catégories.', 'hpk-panneaupocket' ); ?></p>
+										<?php endif; ?>
+									</div>
 									<br />
 									<label><input type="checkbox" name="show_documents_in_article" value="1" <?php checked( $show_docs_in_article, '1' ); ?> /> <?php esc_html_e( 'Afficher les pièces jointes dans l\'article WordPress (PDF et fichiers)', 'hpk-panneaupocket' ); ?></label><br />
 									<label><input type="checkbox" name="featured_from_doc" value="1" <?php checked( $featured_from_doc, '1' ); ?> /> <?php esc_html_e( 'Utiliser la première image comme image mise en avant (extrait)', 'hpk-panneaupocket' ); ?></label>

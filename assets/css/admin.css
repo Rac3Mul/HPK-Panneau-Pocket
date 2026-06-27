@@ -909,6 +909,39 @@
 	flex: 1;
 }
 
+.hpk-pp-wp-category-wrap {
+	margin: 12px 0 0;
+	padding: 12px 14px;
+	border: 1px solid #e2e4e7;
+	border-radius: 8px;
+	background: #f9fafb;
+	max-width: 420px;
+}
+
+.hpk-pp-wp-category-wrap__label {
+	margin: 0 0 8px;
+	font-weight: 600;
+	font-size: 13px;
+	color: #1d2327;
+}
+
+.hpk-pp-wp-category-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+.hpk-pp-wp-category-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: #2c3338;
+	cursor: pointer;
+}
+
 @media (max-width: 1200px) {
 	.hpk-pp-publication__layout {
 		grid-template-columns: 1fr;
