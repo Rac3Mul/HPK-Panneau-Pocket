@@ -3,7 +3,7 @@
  * Plugin Name:       HPK PanneauPocket Connect
  * Plugin URI:        https://panneaupocket.com
  * Description:       Intégration PanneauPocket : widget flottant, shortcodes, publication d'actualités WordPress vers l'API officielle.
- * Version:           1.2.9
+ * Version:           1.3.0
  * Requires at least: 6.0
  * Tested up to:      7.0
  * Requires PHP:      7.4
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'HPK_PP_LOADED_FROM', __FILE__ );
-define( 'HPK_PP_VERSION', '1.2.9' );
+define( 'HPK_PP_VERSION', '1.3.0' );
 define( 'HPK_PP_CANONICAL_BASENAME', 'hpk-panneaupocket/hpk-panneaupocket.php' );
 define( 'HPK_PP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HPK_PP_URL', plugin_dir_url( __FILE__ ) );
@@ -53,6 +53,7 @@ function hpk_pp_missing_required_files() {
 		'includes/class-blocks.php',
 		'includes/class-elementor.php',
 		'includes/class-document-display.php',
+		'includes/class-admin-ui.php',
 	);
 
 	$missing = array();
@@ -108,6 +109,7 @@ require_once HPK_PP_PATH . 'includes/class-sanitizer.php';
 require_once HPK_PP_PATH . 'includes/class-api-client.php';
 require_once HPK_PP_PATH . 'includes/class-publisher.php';
 require_once HPK_PP_PATH . 'includes/class-metabox.php';
+require_once HPK_PP_PATH . 'includes/class-admin-ui.php';
 require_once HPK_PP_PATH . 'includes/class-admin.php';
 require_once HPK_PP_PATH . 'includes/class-shortcodes.php';
 require_once HPK_PP_PATH . 'includes/class-floating-widget.php';
@@ -176,7 +178,8 @@ final class HPK_PanneauPocket {
 	 */
 	public function plugin_action_links( $links ) {
 		if ( current_user_can( 'manage_options' ) ) {
-			$links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=hpk-pp-settings' ) ) . '">' . esc_html__( 'Réglages', 'hpk-panneaupocket' ) . '</a>';
+			$links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=hpk-pp-publication' ) ) . '">' . esc_html__( 'Publication', 'hpk-panneaupocket' ) . '</a>';
+			$links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=hpk-pp-settings' ) ) . '">' . esc_html__( 'Réglages API', 'hpk-panneaupocket' ) . '</a>';
 		}
 		return $links;
 	}

@@ -54,19 +54,19 @@ class HPK_PP_Admin {
 		add_menu_page(
 			__( 'PanneauPocket', 'hpk-panneaupocket' ),
 			__( 'PanneauPocket', 'hpk-panneaupocket' ),
-			'manage_options',
-			'hpk-pp-settings',
-			array( $this, 'render_api_page' ),
+			'publish_posts',
+			'hpk-pp-publication',
+			array( $this, 'render_publication_page' ),
 			'dashicons-megaphone',
 			30
 		);
 
-		add_submenu_page( 'hpk-pp-settings', __( 'Réglages API', 'hpk-panneaupocket' ), __( 'Réglages API', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-settings', array( $this, 'render_api_page' ) );
-		add_submenu_page( 'hpk-pp-settings', __( 'Affichage', 'hpk-panneaupocket' ), __( 'Affichage', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-display', array( $this, 'render_display_page' ) );
-		add_submenu_page( 'hpk-pp-settings', __( 'Widget flottant', 'hpk-panneaupocket' ), __( 'Widget flottant', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-floating', array( $this, 'render_floating_page' ) );
-		add_submenu_page( 'hpk-pp-settings', __( 'Shortcodes', 'hpk-panneaupocket' ), __( 'Shortcodes', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-shortcodes', array( $this, 'render_shortcodes_page' ) );
-		add_submenu_page( 'hpk-pp-settings', __( 'Publication', 'hpk-panneaupocket' ), __( 'Publication', 'hpk-panneaupocket' ), 'publish_posts', 'hpk-pp-publication', array( $this, 'render_publication_page' ) );
-		add_submenu_page( 'hpk-pp-settings', __( 'Logs', 'hpk-panneaupocket' ), __( 'Logs', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-logs', array( $this, 'render_logs_page' ) );
+		add_submenu_page( 'hpk-pp-publication', __( 'Publication', 'hpk-panneaupocket' ), __( 'Publication', 'hpk-panneaupocket' ), 'publish_posts', 'hpk-pp-publication', array( $this, 'render_publication_page' ) );
+		add_submenu_page( 'hpk-pp-publication', __( 'Affichage du logo', 'hpk-panneaupocket' ), __( 'Affichage du logo', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-display', array( $this, 'render_display_page' ) );
+		add_submenu_page( 'hpk-pp-publication', __( 'Widget flottant', 'hpk-panneaupocket' ), __( 'Widget flottant', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-floating', array( $this, 'render_floating_page' ) );
+		add_submenu_page( 'hpk-pp-publication', __( 'Shortcodes', 'hpk-panneaupocket' ), __( 'Shortcodes', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-shortcodes', array( $this, 'render_shortcodes_page' ) );
+		add_submenu_page( 'hpk-pp-publication', __( 'Logs', 'hpk-panneaupocket' ), __( 'Logs', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-logs', array( $this, 'render_logs_page' ) );
+		add_submenu_page( 'hpk-pp-publication', __( 'Réglages API', 'hpk-panneaupocket' ), __( 'Réglages API', 'hpk-panneaupocket' ), 'manage_options', 'hpk-pp-settings', array( $this, 'render_api_page' ) );
 	}
 
 	/**
@@ -261,9 +261,10 @@ class HPK_PP_Admin {
 		wp_enqueue_script( 'hpk-pp-admin', HPK_PP_URL . 'assets/js/admin.js', array( 'jquery' ), HPK_PP_VERSION, true );
 
 		$admin_i18n = array(
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'hpk_pp_admin' ),
-			'i18n'    => array(
+			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+			'nonce'       => wp_create_nonce( 'hpk_pp_admin' ),
+			'defaultLogo' => HPK_PP_Image_Library::get_default_logo_url(),
+			'i18n'        => array(
 				'testing'  => __( 'Test en cours…', 'hpk-panneaupocket' ),
 				'sending'  => __( 'Envoi en cours…', 'hpk-panneaupocket' ),
 				'success'  => __( 'Succès', 'hpk-panneaupocket' ),
@@ -276,7 +277,7 @@ class HPK_PP_Admin {
 
 		$is_publication_page = ( false !== strpos( $hook, 'hpk-pp-publication' ) );
 
-		if ( 'post.php' === $hook || 'post-new.php' === $hook || $is_publication_page ) {
+		if ( 'post.php' === $hook || 'post-new.php' === $hook || $is_publication_page || false !== strpos( $hook, 'hpk-pp-display' ) ) {
 			wp_enqueue_media();
 		}
 
@@ -438,64 +439,52 @@ class HPK_PP_Admin {
 		$last_error   = get_option( 'hpk_pp_last_test_error', '' );
 		?>
 		<div class="wrap hpk-pp-admin">
-			<h1><?php esc_html_e( 'PanneauPocket — Réglages API', 'hpk-panneaupocket' ); ?></h1>
-			<form method="post" action="options.php">
+			<?php
+			HPK_PP_Admin_UI::page_header(
+				__( 'Réglages API', 'hpk-panneaupocket' ),
+				__( 'Connexion à PanneauPocket : environnement, token, identifiant commune.', 'hpk-panneaupocket' )
+			);
+			?>
+
+			<form method="post" action="options.php" class="hpk-pp-form">
 				<?php settings_fields( 'hpk_pp_api_settings' ); ?>
-				<table class="form-table">
-					<tr>
-						<th><?php esc_html_e( 'Environnement', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<select name="hpk_pp_environment">
-								<option value="production" <?php selected( get_option( 'hpk_pp_environment' ), 'production' ); ?>><?php esc_html_e( 'Production', 'hpk-panneaupocket' ); ?></option>
-								<option value="staging" <?php selected( get_option( 'hpk_pp_environment' ), 'staging' ); ?>><?php esc_html_e( 'Staging', 'hpk-panneaupocket' ); ?></option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'URL API', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<input type="url" name="hpk_pp_api_url" value="<?php echo esc_attr( $this->get_stored_option( 'hpk_pp_api_url', 'https://gestion.panneaupocket.com' ) ); ?>" class="regular-text" />
-							<p class="description"><?php esc_html_e( 'API REST (token, publications) : gestion.panneaupocket.com', 'hpk-panneaupocket' ); ?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'URL embed iframe', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<input type="url" name="hpk_pp_embed_url" value="<?php echo esc_attr( $this->get_stored_option( 'hpk_pp_embed_url', 'https://app.panneaupocket.com' ) ); ?>" class="regular-text" />
-							<p class="description"><?php esc_html_e( 'Affichage widget iframe : app.panneaupocket.com (distinct de l\'URL API).', 'hpk-panneaupocket' ); ?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Token Bearer', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<input type="password" name="hpk_pp_api_token_plain" value="" class="regular-text" autocomplete="new-password" placeholder="••••••••" />
-							<p class="description"><?php esc_html_e( 'Laisser vide pour conserver le token actuel. Le token n\'est jamais affiché en clair.', 'hpk-panneaupocket' ); ?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'City ID', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<input type="text" name="hpk_pp_city_id" value="<?php echo esc_attr( get_option( 'hpk_pp_city_id', '' ) ); ?>" class="regular-text" inputmode="numeric" pattern="[0-9]*" placeholder="1463772976" />
-							<p class="description"><?php esc_html_e( 'Identifiant commune PanneauPocket (chiffres uniquement). Obligatoire pour le widget flottant.', 'hpk-panneaupocket' ); ?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Publication automatique', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<label><?php $this->checkbox_field( 'hpk_pp_auto_send_on_publish', get_option( 'hpk_pp_auto_send_on_publish' ) ); ?> <?php esc_html_e( 'Envoyer automatiquement à la publication WordPress', 'hpk-panneaupocket' ); ?></label><br />
-							<label><?php $this->checkbox_field( 'hpk_pp_auto_update_on_save', get_option( 'hpk_pp_auto_update_on_save', '1' ) ); ?> <?php esc_html_e( 'Mettre à jour automatiquement sur PanneauPocket à la modification', 'hpk-panneaupocket' ); ?></label>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Rétention logs (jours)', 'hpk-panneaupocket' ); ?></th>
-						<td><input type="number" name="hpk_pp_log_retention_days" value="<?php echo esc_attr( $this->get_stored_option( 'hpk_pp_log_retention_days', 90 ) ); ?>" min="7" max="365" /></td>
-					</tr>
-				</table>
-				<?php submit_button(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Connexion', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<?php
+				HPK_PP_Admin_UI::field_select(
+					'hpk_pp_environment',
+					__( 'Environnement', 'hpk-panneaupocket' ),
+					array(
+						'production' => __( 'Production', 'hpk-panneaupocket' ),
+						'staging'    => __( 'Staging (test)', 'hpk-panneaupocket' ),
+					),
+					get_option( 'hpk_pp_environment', 'production' ),
+					__( 'Utilisez Staging pour vos essais sans impacter les usagers.', 'hpk-panneaupocket' )
+				);
+				HPK_PP_Admin_UI::field_input( 'url', 'hpk_pp_api_url', __( 'URL API', 'hpk-panneaupocket' ), $this->get_stored_option( 'hpk_pp_api_url', 'https://gestion.panneaupocket.com' ), __( 'API REST : gestion.panneaupocket.com', 'hpk-panneaupocket' ), array( 'class' => 'hpk-pp-input regular-text large-text' ) );
+				HPK_PP_Admin_UI::field_input( 'url', 'hpk_pp_embed_url', __( 'URL embed iframe', 'hpk-panneaupocket' ), $this->get_stored_option( 'hpk_pp_embed_url', 'https://app.panneaupocket.com' ), __( 'Widget iframe : app.panneaupocket.com', 'hpk-panneaupocket' ), array( 'class' => 'hpk-pp-input regular-text large-text' ) );
+				HPK_PP_Admin_UI::field_input( 'password', 'hpk_pp_api_token_plain', __( 'Token Bearer', 'hpk-panneaupocket' ), '', __( 'Laisser vide pour conserver le token actuel.', 'hpk-panneaupocket' ), array( 'autocomplete' => 'new-password', 'placeholder' => '••••••••' ) );
+				HPK_PP_Admin_UI::field_input( 'text', 'hpk_pp_city_id', __( 'City ID', 'hpk-panneaupocket' ), get_option( 'hpk_pp_city_id', '' ), __( 'Identifiant commune (chiffres uniquement). Obligatoire pour le widget.', 'hpk-panneaupocket' ), array( 'inputmode' => 'numeric', 'pattern' => '[0-9]*', 'placeholder' => '1463772976' ) );
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Synchronisation & logs', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<?php
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_auto_send_on_publish', __( 'Envoyer automatiquement à la publication WordPress', 'hpk-panneaupocket' ), get_option( 'hpk_pp_auto_send_on_publish' ) );
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_auto_update_on_save', __( 'Mettre à jour PanneauPocket à chaque modification', 'hpk-panneaupocket' ), get_option( 'hpk_pp_auto_update_on_save', '1' ) );
+				HPK_PP_Admin_UI::field_input( 'number', 'hpk_pp_log_retention_days', __( 'Rétention des logs (jours)', 'hpk-panneaupocket' ), $this->get_stored_option( 'hpk_pp_log_retention_days', 90 ), '', array( 'min' => '7', 'max' => '365' ) );
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php submit_button( __( 'Enregistrer', 'hpk-panneaupocket' ), 'primary hpk-pp-btn-primary', 'submit', false ); ?>
 			</form>
 
-			<hr />
-			<h2><?php esc_html_e( 'Tester la connexion API', 'hpk-panneaupocket' ); ?></h2>
+			<?php HPK_PP_Admin_UI::card_open( __( 'Tester la connexion', 'hpk-panneaupocket' ) ); ?>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Vérifie que le token et le City ID sont valides.', 'hpk-panneaupocket' ); ?></p>
 			<button type="button" class="button button-secondary hpk-pp-test-connection"><?php esc_html_e( 'Tester la connexion', 'hpk-panneaupocket' ); ?></button>
 			<div class="hpk-pp-test-result">
 				<?php if ( $last_success ) : ?>
@@ -505,6 +494,7 @@ class HPK_PP_Admin {
 					<p class="hpk-pp-notice error"><?php printf( esc_html__( 'Dernière erreur : %s', 'hpk-panneaupocket' ), esc_html( $last_error ) ); ?></p>
 				<?php endif; ?>
 			</div>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
 		</div>
 		<?php
 	}
@@ -516,34 +506,68 @@ class HPK_PP_Admin {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+
+		$custom_logo = get_option( 'hpk_pp_custom_logo', '' );
 		?>
 		<div class="wrap hpk-pp-admin">
-			<h1><?php esc_html_e( 'PanneauPocket — Affichage', 'hpk-panneaupocket' ); ?></h1>
-			<form method="post" action="options.php">
+			<?php
+			HPK_PP_Admin_UI::page_header(
+				__( 'Affichage du logo', 'hpk-panneaupocket' ),
+				__( 'Personnalisez le logo et les couleurs du bouton flottant PanneauPocket.', 'hpk-panneaupocket' )
+			);
+			?>
+
+			<?php HPK_PP_Admin_UI::layout_split_open(); ?>
+			<?php HPK_PP_Admin_UI::layout_main_open(); ?>
+
+			<form method="post" action="options.php" class="hpk-pp-form hpk-pp-form--display">
 				<?php settings_fields( 'hpk_pp_display_settings' ); ?>
-				<table class="form-table">
-					<tr><th><?php esc_html_e( 'Couleur principale', 'hpk-panneaupocket' ); ?></th><td><input type="color" name="hpk_pp_color_primary" value="<?php echo esc_attr( get_option( 'hpk_pp_color_primary', '#0066cc' ) ); ?>" /></td></tr>
-					<tr><th><?php esc_html_e( 'Couleur secondaire', 'hpk-panneaupocket' ); ?></th><td><input type="color" name="hpk_pp_color_secondary" value="<?php echo esc_attr( get_option( 'hpk_pp_color_secondary', '#004499' ) ); ?>" /></td></tr>
-					<tr><th><?php esc_html_e( 'Couleur du texte', 'hpk-panneaupocket' ); ?></th><td><input type="color" name="hpk_pp_color_text" value="<?php echo esc_attr( get_option( 'hpk_pp_color_text', '#333333' ) ); ?>" /></td></tr>
-					<tr><th><?php esc_html_e( 'Couleur du bouton flottant', 'hpk-panneaupocket' ); ?></th><td><input type="color" name="hpk_pp_color_button" value="<?php echo esc_attr( get_option( 'hpk_pp_color_button', '#0066cc' ) ); ?>" /></td></tr>
-					<tr>
-						<th><?php esc_html_e( 'Logo personnalisé', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<input type="hidden" name="hpk_pp_custom_logo" id="hpk_pp_custom_logo" value="<?php echo esc_attr( get_option( 'hpk_pp_custom_logo', '' ) ); ?>" />
-							<button type="button" class="button hpk-pp-logo-picker"><?php esc_html_e( 'Choisir un logo', 'hpk-panneaupocket' ); ?></button>
-							<label><?php $this->checkbox_field( 'hpk_pp_use_custom_logo', get_option( 'hpk_pp_use_custom_logo' ) ); ?> <?php esc_html_e( 'Utiliser le logo personnalisé', 'hpk-panneaupocket' ); ?></label>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Options', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<label><?php $this->checkbox_field( 'hpk_pp_animations', get_option( 'hpk_pp_animations', '1' ) ); ?> <?php esc_html_e( 'Activer les animations', 'hpk-panneaupocket' ); ?></label><br />
-							<label><?php $this->checkbox_field( 'hpk_pp_responsive_mobile', get_option( 'hpk_pp_responsive_mobile', '1' ) ); ?> <?php esc_html_e( 'Activer le responsive mobile', 'hpk-panneaupocket' ); ?></label>
-						</td>
-					</tr>
-				</table>
-				<?php submit_button(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Logo du bouton flottant', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<div class="hpk-pp-field">
+					<span class="hpk-pp-field__label"><?php esc_html_e( 'Logo personnalisé', 'hpk-panneaupocket' ); ?></span>
+					<div class="hpk-pp-field__control hpk-pp-logo-picker-row">
+						<input type="hidden" name="hpk_pp_custom_logo" id="hpk_pp_custom_logo" value="<?php echo esc_attr( $custom_logo ); ?>" />
+						<button type="button" class="button hpk-pp-logo-picker"><?php esc_html_e( 'Choisir dans la médiathèque', 'hpk-panneaupocket' ); ?></button>
+						<?php if ( $custom_logo ) : ?>
+							<button type="button" class="button-link hpk-pp-logo-clear"><?php esc_html_e( 'Retirer', 'hpk-panneaupocket' ); ?></button>
+						<?php endif; ?>
+					</div>
+					<p class="hpk-pp-field__help"><?php esc_html_e( 'Format carré recommandé (PNG, SVG ou JPG). Sinon, le logo PanneauPocket officiel est utilisé.', 'hpk-panneaupocket' ); ?></p>
+				</div>
+				<?php
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_use_custom_logo', __( 'Utiliser mon logo personnalisé', 'hpk-panneaupocket' ), get_option( 'hpk_pp_use_custom_logo' ) );
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Couleurs', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<?php
+				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_primary', __( 'Couleur principale', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_primary', '#0066cc' ), __( 'Liens et accents des blocs actualités.', 'hpk-panneaupocket' ) );
+				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_secondary', __( 'Couleur secondaire', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_secondary', '#004499' ) );
+				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_text', __( 'Couleur du texte', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_text', '#333333' ) );
+				HPK_PP_Admin_UI::field_color( 'hpk_pp_color_button', __( 'Couleur du bouton flottant', 'hpk-panneaupocket' ), get_option( 'hpk_pp_color_button', '#0066cc' ), __( 'Fond du bouton rond en bas de page.', 'hpk-panneaupocket' ) );
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Comportement', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<?php
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_animations', __( 'Activer les animations', 'hpk-panneaupocket' ), get_option( 'hpk_pp_animations', '1' ) );
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_responsive_mobile', __( 'Optimiser l\'affichage mobile', 'hpk-panneaupocket' ), get_option( 'hpk_pp_responsive_mobile', '1' ) );
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php submit_button( __( 'Enregistrer', 'hpk-panneaupocket' ), 'primary hpk-pp-btn-primary', 'submit', false ); ?>
 			</form>
+
+			<?php HPK_PP_Admin_UI::layout_aside_open(); ?>
+			<?php HPK_PP_Admin_UI::render_logo_preview_panel(); ?>
+			<?php HPK_PP_Admin_UI::layout_split_close(); ?>
 		</div>
 		<?php
 	}
@@ -559,69 +583,89 @@ class HPK_PP_Admin {
 		$status = HPK_PP_Floating_Widget::get_render_status();
 		?>
 		<div class="wrap hpk-pp-admin">
-			<h1><?php esc_html_e( 'PanneauPocket — Widget flottant', 'hpk-panneaupocket' ); ?></h1>
+			<?php
+			HPK_PP_Admin_UI::page_header(
+				__( 'Widget flottant', 'hpk-panneaupocket' ),
+				__( 'Bouton rond PanneauPocket affiché sur votre site public.', 'hpk-panneaupocket' )
+			);
+			?>
 
-			<div class="notice <?php echo $status['will_render'] ? 'notice-success' : 'notice-warning'; ?> inline" style="padding:12px 16px;margin:16px 0;">
-				<p><strong><?php esc_html_e( 'État sur le site public', 'hpk-panneaupocket' ); ?></strong></p>
-				<?php if ( $status['will_render'] ) : ?>
-					<p><?php esc_html_e( 'Le widget sera injecté sur le front (bouton rond en bas à droite/gauche).', 'hpk-panneaupocket' ); ?></p>
-				<?php else : ?>
-					<p><?php esc_html_e( 'Le widget ne s\'affiche pas actuellement car :', 'hpk-panneaupocket' ); ?></p>
-					<ul style="list-style:disc;margin-left:20px;">
+			<?php if ( $status['will_render'] ) : ?>
+				<?php HPK_PP_Admin_UI::status_banner( true, __( 'Widget actif sur le site', 'hpk-panneaupocket' ), __( 'Le bouton sera visible en bas à droite ou à gauche.', 'hpk-panneaupocket' ) ); ?>
+			<?php else : ?>
+				<div class="hpk-pp-status-banner is-warning">
+					<strong><?php esc_html_e( 'Widget inactif', 'hpk-panneaupocket' ); ?></strong>
+					<ul class="hpk-pp-status-list">
 						<?php foreach ( $status['reasons'] as $reason ) : ?>
 							<li><?php echo esc_html( $reason ); ?></li>
 						<?php endforeach; ?>
 					</ul>
-				<?php endif; ?>
-				<p>
-					<?php esc_html_e( 'Valeurs enregistrées :', 'hpk-panneaupocket' ); ?>
-					<code>activé=<?php echo esc_html( $status['settings']['enabled'] ); ?></code>,
-					<code>city_id=<?php echo esc_html( $status['settings']['city_id'] ? $status['settings']['city_id'] : '(vide)' ); ?></code>
-				</p>
-			</div>
+				</div>
+			<?php endif; ?>
 
-			<form method="post" action="options.php">
+			<form method="post" action="options.php" class="hpk-pp-form">
 				<?php settings_fields( 'hpk_pp_floating_settings' ); ?>
-				<table class="form-table">
-					<tr><th><?php esc_html_e( 'Activer', 'hpk-panneaupocket' ); ?></th><td><label><?php $this->checkbox_field( 'hpk_pp_floating_enabled', get_option( 'hpk_pp_floating_enabled' ) ); ?> <?php esc_html_e( 'Activer le widget flottant', 'hpk-panneaupocket' ); ?></label></td></tr>
-					<tr>
-						<th><?php esc_html_e( 'Position', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<select name="hpk_pp_floating_position">
-								<option value="bottom-right" <?php selected( get_option( 'hpk_pp_floating_position' ), 'bottom-right' ); ?>><?php esc_html_e( 'Bas droite', 'hpk-panneaupocket' ); ?></option>
-								<option value="bottom-left" <?php selected( get_option( 'hpk_pp_floating_position' ), 'bottom-left' ); ?>><?php esc_html_e( 'Bas gauche', 'hpk-panneaupocket' ); ?></option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Mode', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<select name="hpk_pp_floating_mode">
-								<option value="widget" <?php selected( get_option( 'hpk_pp_floating_mode', 'widget' ), 'widget' ); ?>>widget</option>
-								<option value="widgetTv" <?php selected( get_option( 'hpk_pp_floating_mode' ), 'widgetTv' ); ?>>widgetTv</option>
-							</select>
-						</td>
-					</tr>
-					<tr><th><?php esc_html_e( 'Largeur desktop', 'hpk-panneaupocket' ); ?></th><td><input type="text" name="hpk_pp_floating_width" value="<?php echo esc_attr( get_option( 'hpk_pp_floating_width', '330' ) ); ?>" /> px</td></tr>
-					<tr><th><?php esc_html_e( 'Hauteur desktop', 'hpk-panneaupocket' ); ?></th><td><input type="text" name="hpk_pp_floating_height" value="<?php echo esc_attr( get_option( 'hpk_pp_floating_height', '518' ) ); ?>" /> px</td></tr>
-					<tr><th><?php esc_html_e( 'Largeur mobile', 'hpk-panneaupocket' ); ?></th><td><input type="text" name="hpk_pp_floating_width_mobile" value="<?php echo esc_attr( get_option( 'hpk_pp_floating_width_mobile', '92vw' ) ); ?>" /></td></tr>
-					<tr><th><?php esc_html_e( 'Hauteur mobile', 'hpk-panneaupocket' ); ?></th><td><input type="text" name="hpk_pp_floating_height_mobile" value="<?php echo esc_attr( get_option( 'hpk_pp_floating_height_mobile', '75vh' ) ); ?>" /></td></tr>
-					<tr>
-						<th><?php esc_html_e( 'Auto-navigation', 'hpk-panneaupocket' ); ?></th>
-						<td>
-							<select name="hpk_pp_floating_auto_nav">
-								<?php foreach ( array( 0, 10, 15, 30 ) as $sec ) : ?>
-									<option value="<?php echo esc_attr( $sec ); ?>" <?php selected( get_option( 'hpk_pp_floating_auto_nav', '0' ), (string) $sec ); ?>><?php echo esc_html( $sec ); ?>s</option>
-								<?php endforeach; ?>
-							</select>
-						</td>
-					</tr>
-					<tr><th><?php esc_html_e( 'Couleur fond (widgetTv)', 'hpk-panneaupocket' ); ?></th><td><input type="text" name="hpk_pp_floating_bg_color" value="<?php echo esc_attr( get_option( 'hpk_pp_floating_bg_color', 'ffffff' ) ); ?>" placeholder="ffffff" /></td></tr>
-					<tr><th><?php esc_html_e( 'Mobile', 'hpk-panneaupocket' ); ?></th><td><label><?php $this->checkbox_field( 'hpk_pp_floating_mobile', get_option( 'hpk_pp_floating_mobile', '1' ) ); ?> <?php esc_html_e( 'Afficher sur mobile', 'hpk-panneaupocket' ); ?></label></td></tr>
-					<tr><th><?php esc_html_e( 'Pages exclues', 'hpk-panneaupocket' ); ?></th><td><input type="text" name="hpk_pp_floating_excluded_pages" value="<?php echo esc_attr( get_option( 'hpk_pp_floating_excluded_pages', '' ) ); ?>" class="large-text" placeholder="12,45,78" /><p class="description"><?php esc_html_e( 'IDs de pages séparés par des virgules.', 'hpk-panneaupocket' ); ?></p></td></tr>
-					<tr><th><?php esc_html_e( 'Mémoriser fermeture', 'hpk-panneaupocket' ); ?></th><td><label><?php $this->checkbox_field( 'hpk_pp_floating_remember_closed', get_option( 'hpk_pp_floating_remember_closed', '1' ) ); ?> <?php esc_html_e( 'Retenir l\'état fermé (localStorage)', 'hpk-panneaupocket' ); ?></label></td></tr>
-				</table>
-				<?php submit_button(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Général', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<?php
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_floating_enabled', __( 'Activer le widget flottant', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_enabled' ) );
+				HPK_PP_Admin_UI::field_select(
+					'hpk_pp_floating_position',
+					__( 'Position', 'hpk-panneaupocket' ),
+					array(
+						'bottom-right' => __( 'Bas droite', 'hpk-panneaupocket' ),
+						'bottom-left'  => __( 'Bas gauche', 'hpk-panneaupocket' ),
+					),
+					get_option( 'hpk_pp_floating_position', 'bottom-right' )
+				);
+				HPK_PP_Admin_UI::field_select(
+					'hpk_pp_floating_mode',
+					__( 'Mode iframe', 'hpk-panneaupocket' ),
+					array(
+						'widget'   => 'widget',
+						'widgetTv' => 'widgetTv',
+					),
+					get_option( 'hpk_pp_floating_mode', 'widget' )
+				);
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Dimensions', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<?php
+				HPK_PP_Admin_UI::field_input( 'text', 'hpk_pp_floating_width', __( 'Largeur desktop (px)', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_width', '330' ) );
+				HPK_PP_Admin_UI::field_input( 'text', 'hpk_pp_floating_height', __( 'Hauteur desktop (px)', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_height', '518' ) );
+				HPK_PP_Admin_UI::field_input( 'text', 'hpk_pp_floating_width_mobile', __( 'Largeur mobile', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_width_mobile', '92vw' ) );
+				HPK_PP_Admin_UI::field_input( 'text', 'hpk_pp_floating_height_mobile', __( 'Hauteur mobile', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_height_mobile', '75vh' ) );
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php HPK_PP_Admin_UI::card_open( __( 'Avancé', 'hpk-panneaupocket' ) ); ?>
+				<?php HPK_PP_Admin_UI::fields_open(); ?>
+				<?php
+				HPK_PP_Admin_UI::field_select(
+					'hpk_pp_floating_auto_nav',
+					__( 'Auto-navigation', 'hpk-panneaupocket' ),
+					array(
+						'0'  => '0s',
+						'10' => '10s',
+						'15' => '15s',
+						'30' => '30s',
+					),
+					(string) get_option( 'hpk_pp_floating_auto_nav', '0' )
+				);
+				HPK_PP_Admin_UI::field_input( 'text', 'hpk_pp_floating_bg_color', __( 'Couleur fond (widgetTv)', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_bg_color', 'ffffff' ), '', array( 'placeholder' => 'ffffff' ) );
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_floating_mobile', __( 'Afficher sur mobile', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_mobile', '1' ) );
+				HPK_PP_Admin_UI::field_input( 'text', 'hpk_pp_floating_excluded_pages', __( 'Pages exclues', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_excluded_pages', '' ), __( 'IDs séparés par des virgules (ex. 12,45,78).', 'hpk-panneaupocket' ), array( 'class' => 'hpk-pp-input regular-text large-text' ) );
+				HPK_PP_Admin_UI::field_toggle( 'hpk_pp_floating_remember_closed', __( 'Mémoriser la fermeture (localStorage)', 'hpk-panneaupocket' ), get_option( 'hpk_pp_floating_remember_closed', '1' ) );
+				?>
+				<?php HPK_PP_Admin_UI::fields_close(); ?>
+				<?php HPK_PP_Admin_UI::card_close(); ?>
+
+				<?php submit_button( __( 'Enregistrer', 'hpk-panneaupocket' ), 'primary hpk-pp-btn-primary', 'submit', false ); ?>
 			</form>
 		</div>
 		<?php
@@ -646,31 +690,43 @@ class HPK_PP_Admin {
 		);
 		?>
 		<div class="wrap hpk-pp-admin">
-			<h1><?php esc_html_e( 'PanneauPocket — Shortcodes', 'hpk-panneaupocket' ); ?></h1>
-			<p><?php esc_html_e( 'Copiez ces shortcodes dans vos pages, articles ou widgets texte.', 'hpk-panneaupocket' ); ?></p>
+			<?php
+			HPK_PP_Admin_UI::page_header(
+				__( 'Shortcodes', 'hpk-panneaupocket' ),
+				__( 'Copiez-collez ces codes dans vos pages, articles ou widgets.', 'hpk-panneaupocket' )
+			);
+			?>
 
-			<h2><?php esc_html_e( 'Widget iframe', 'hpk-panneaupocket' ); ?></h2>
-			<p><code>[panneaupocket_widget]</code></p>
-			<p><?php esc_html_e( 'URL embed : app.panneaupocket.com/embeded/{cityId} — distincte de l\'URL API (gestion.panneaupocket.com).', 'hpk-panneaupocket' ); ?></p>
-			<p><?php esc_html_e( 'Attributs : mode, auto_navigation, bg_color, city_id, width, height', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_open( __( 'Widget iframe', 'hpk-panneaupocket' ) ); ?>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Affiche le widget PanneauPocket intégré (app.panneaupocket.com).', 'hpk-panneaupocket' ); ?></p>
+			<div class="hpk-pp-copy-block">
+				<code>[panneaupocket_widget]</code>
+				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_widget]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
+			</div>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : mode, auto_navigation, bg_color, city_id, width, height', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
 
-			<h2><?php esc_html_e( 'Actualités WordPress synchronisées', 'hpk-panneaupocket' ); ?></h2>
-			<p><code>[panneaupocket_news]</code></p>
-			<p><?php esc_html_e( 'Attributs : limit, per_page, layout (grid/list/compact), show_date, show_image, show_type, excerpt_length, pagination', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_open( __( 'Actualités synchronisées', 'hpk-panneaupocket' ) ); ?>
+			<div class="hpk-pp-copy-block">
+				<code>[panneaupocket_news]</code>
+				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_news]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
+			</div>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : limit, per_page, layout (grid/list/compact), show_date, show_image, show_type, excerpt_length, pagination', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
 
-			<h2><?php esc_html_e( 'Exemples', 'hpk-panneaupocket' ); ?></h2>
+			<?php HPK_PP_Admin_UI::card_open( __( 'Exemples', 'hpk-panneaupocket' ) ); ?>
 			<?php foreach ( $examples as $ex ) : ?>
 				<div class="hpk-pp-copy-block">
 					<code><?php echo esc_html( $ex ); ?></code>
 					<button type="button" class="button hpk-pp-copy-btn" data-copy="<?php echo esc_attr( $ex ); ?>"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
 				</div>
 			<?php endforeach; ?>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
 
-			<h2><?php esc_html_e( 'Widgets WordPress', 'hpk-panneaupocket' ); ?></h2>
-			<p><?php esc_html_e( 'Deux widgets sont disponibles dans Apparence > Widgets : « HPK PanneauPocket — Widget iframe » et « HPK PanneauPocket — Actualités ».', 'hpk-panneaupocket' ); ?></p>
-			<p><?php esc_html_e( 'Deux blocs Gutenberg sont également disponibles dans l\'éditeur de blocs.', 'hpk-panneaupocket' ); ?></p>
-			<h2><?php esc_html_e( 'Elementor', 'hpk-panneaupocket' ); ?></h2>
-			<p><?php esc_html_e( 'Si Elementor est installé, deux widgets apparaissent dans la catégorie « PanneauPocket » : « PanneauPocket Widget » (iframe) et « PanneauPocket Actualités ».', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_open( __( 'Intégrations', 'hpk-panneaupocket' ) ); ?>
+			<p><?php esc_html_e( 'Widgets WordPress : Apparence → Widgets — « HPK PanneauPocket — Widget iframe » et « HPK PanneauPocket — Actualités ».', 'hpk-panneaupocket' ); ?></p>
+			<p><?php esc_html_e( 'Blocs Gutenberg et widgets Elementor (catégorie PanneauPocket) également disponibles.', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
 		</div>
 		<?php
 	}
@@ -710,8 +766,12 @@ class HPK_PP_Admin {
 		}
 		?>
 		<div class="wrap hpk-pp-admin hpk-pp-publication">
-			<h1><?php esc_html_e( 'PanneauPocket — Publication', 'hpk-panneaupocket' ); ?></h1>
-			<p><?php esc_html_e( 'Publiez directement sur PanneauPocket sans créer d\'article WordPress public.', 'hpk-panneaupocket' ); ?></p>
+			<?php
+			HPK_PP_Admin_UI::page_header(
+				__( 'Publication', 'hpk-panneaupocket' ),
+				__( 'Créez et envoyez une actualité PanneauPocket avec aperçu mobile en direct.', 'hpk-panneaupocket' )
+			);
+			?>
 
 			<div class="hpk-pp-publication__layout">
 				<div class="hpk-pp-publication__form">
@@ -720,6 +780,7 @@ class HPK_PP_Admin {
 						<input type="hidden" name="sign_id" value="<?php echo esc_attr( $sign_id ); ?>" />
 						<?php wp_nonce_field( 'hpk_pp_publication' ); ?>
 
+						<?php HPK_PP_Admin_UI::card_open( __( 'Actualité', 'hpk-panneaupocket' ), 'hpk-pp-publication__form-card' ); ?>
 						<table class="form-table">
 							<tr>
 								<th><?php esc_html_e( 'Titre (max 50)', 'hpk-panneaupocket' ); ?></th>
@@ -837,8 +898,9 @@ class HPK_PP_Admin {
 								</td>
 							</tr>
 						</table>
+						<?php HPK_PP_Admin_UI::card_close(); ?>
 
-						<p>
+						<p class="hpk-pp-publication__actions">
 							<button type="submit" name="pub_action" value="create" class="button button-primary"><?php esc_html_e( 'Envoyer sur PanneauPocket', 'hpk-panneaupocket' ); ?></button>
 							<?php if ( $sign_id ) : ?>
 								<button type="submit" name="pub_action" value="update" class="button"><?php esc_html_e( 'Mettre à jour sur PanneauPocket', 'hpk-panneaupocket' ); ?></button>
@@ -906,14 +968,20 @@ class HPK_PP_Admin {
 		);
 		?>
 		<div class="wrap hpk-pp-admin">
-			<h1><?php esc_html_e( 'PanneauPocket — Logs', 'hpk-panneaupocket' ); ?></h1>
+			<?php
+			HPK_PP_Admin_UI::page_header(
+				__( 'Logs API', 'hpk-panneaupocket' ),
+				__( 'Historique des envois et réponses PanneauPocket.', 'hpk-panneaupocket' )
+			);
+			?>
 
-			<p>
+			<?php HPK_PP_Admin_UI::card_open(); ?>
+			<p class="hpk-pp-toolbar">
 				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=hpk_pp_export_logs' . ( $post_id ? '&post_id=' . $post_id : '' ) ), 'hpk_pp_export_logs' ) ); ?>" class="button"><?php esc_html_e( 'Exporter CSV', 'hpk-panneaupocket' ); ?></a>
 				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=hpk_pp_purge_logs' ), 'hpk_pp_purge_logs' ) ); ?>" class="button" onclick="return confirm('<?php echo esc_js( __( 'Purger les anciens logs ?', 'hpk-panneaupocket' ) ); ?>');"><?php esc_html_e( 'Purger les anciens logs', 'hpk-panneaupocket' ); ?></a>
 			</p>
 
-			<table class="wp-list-table widefat fixed striped">
+			<table class="wp-list-table widefat fixed striped hpk-pp-logs-table">
 				<thead>
 					<tr>
 						<th><?php esc_html_e( 'Date', 'hpk-panneaupocket' ); ?></th>
@@ -964,6 +1032,7 @@ class HPK_PP_Admin {
 					</div>
 				</div>
 			<?php endif; ?>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
 		</div>
 		<?php
 	}
