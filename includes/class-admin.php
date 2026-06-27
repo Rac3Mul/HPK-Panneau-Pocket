@@ -379,15 +379,17 @@ class HPK_PP_Admin {
 		check_admin_referer( 'hpk_pp_publication' );
 
 		$form = array(
-			'title'          => sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) ),
-			'type'           => sanitize_text_field( wp_unslash( $_POST['type'] ?? 'info' ) ),
-			'start_at'       => sanitize_text_field( wp_unslash( $_POST['start_at'] ?? '' ) ),
-			'end_at'         => sanitize_text_field( wp_unslash( $_POST['end_at'] ?? '' ) ),
-			'content'        => wp_kses_post( wp_unslash( $_POST['content'] ?? '' ) ),
-			'use_wp_content' => ! empty( $_POST['use_wp_content'] ),
-			'use_featured'   => ! empty( $_POST['use_featured'] ),
-			'draft_mode'     => ! empty( $_POST['draft_mode'] ),
-			'documents'      => isset( $_POST['documents'] ) ? array_map( 'esc_url_raw', wp_unslash( (array) $_POST['documents'] ) ) : array(),
+			'title'                     => sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) ),
+			'type'                      => sanitize_text_field( wp_unslash( $_POST['type'] ?? 'info' ) ),
+			'start_at'                  => sanitize_text_field( wp_unslash( $_POST['start_at'] ?? '' ) ),
+			'end_at'                    => sanitize_text_field( wp_unslash( $_POST['end_at'] ?? '' ) ),
+			'content'                   => wp_kses_post( wp_unslash( $_POST['content'] ?? '' ) ),
+			'use_wp_content'            => ! empty( $_POST['use_wp_content'] ),
+			'use_featured'              => ! empty( $_POST['use_featured'] ),
+			'draft_mode'                => ! empty( $_POST['draft_mode'] ),
+			'featured_from_doc'         => ! empty( $_POST['featured_from_doc'] ),
+			'show_documents_in_article' => ! empty( $_POST['show_documents_in_article'] ),
+			'documents'                 => isset( $_POST['documents'] ) ? array_map( 'esc_url_raw', wp_unslash( (array) $_POST['documents'] ) ) : array(),
 		);
 
 		$action  = sanitize_text_field( wp_unslash( $_POST['pub_action'] ?? 'create' ) );
@@ -409,8 +411,8 @@ class HPK_PP_Admin {
 			$publisher->publish_post( $post_id, $sync_action );
 		}
 
-		if ( ! empty( $_POST['create_wp_post'] ) ) {
-			$this->create_linked_wp_post( $post_id, $form );
+		if ( ! empty( $_POST['create_wp_post'] ) || HPK_PP_Document_Display::get_linked_wp_post_id( $post_id ) ) {
+			HPK_PP_Document_Display::sync_linked_wp_post( $post_id, $form );
 		}
 
 		wp_safe_redirect( admin_url( 'admin.php?page=hpk-pp-publication&saved=1&sign_id=' . $post_id ) );
@@ -418,25 +420,10 @@ class HPK_PP_Admin {
 	}
 
 	/**
-	 * Create linked public WordPress post from standalone sign.
-	 *
-	 * @param int   $sign_id Sign post ID.
-	 * @param array $form Form data.
+	 * @deprecated 1.2.8 Use HPK_PP_Document_Display::sync_linked_wp_post().
 	 */
 	private function create_linked_wp_post( $sign_id, $form ) {
-		$wp_post_id = wp_insert_post(
-			array(
-				'post_type'    => 'post',
-				'post_title'   => $form['title'],
-				'post_content' => $form['content'],
-				'post_status'  => 'publish',
-			)
-		);
-
-		if ( $wp_post_id && ! is_wp_error( $wp_post_id ) ) {
-			update_post_meta( $wp_post_id, '_panneaupocket_enabled', '1' );
-			update_post_meta( $wp_post_id, '_panneaupocket_linked_sign', $sign_id );
-		}
+		HPK_PP_Document_Display::sync_linked_wp_post( $sign_id, $form );
 	}
 
 	/**
@@ -715,6 +702,12 @@ class HPK_PP_Admin {
 		$title_len = function_exists( 'mb_strlen' ) ? mb_strlen( $title ) : strlen( $title );
 		$logo_url  = HPK_PP_Image_Library::get_default_logo_url();
 		$library   = HPK_PP_Image_Library::get_base_library();
+		$linked_wp_post_id = $sign_id ? HPK_PP_Document_Display::get_linked_wp_post_id( $sign_id ) : 0;
+		$featured_from_doc = $sign ? get_post_meta( $sign_id, '_panneaupocket_featured_from_doc', true ) : '';
+		$show_docs_in_article = $sign ? get_post_meta( $sign_id, '_panneaupocket_show_documents_in_article', true ) : '1';
+		if ( '' === $show_docs_in_article ) {
+			$show_docs_in_article = '1';
+		}
 		?>
 		<div class="wrap hpk-pp-admin hpk-pp-publication">
 			<h1><?php esc_html_e( 'PanneauPocket — Publication', 'hpk-panneaupocket' ); ?></h1>
@@ -833,7 +826,13 @@ class HPK_PP_Admin {
 								<th><?php esc_html_e( 'Options', 'hpk-panneaupocket' ); ?></th>
 								<td>
 									<label><input type="checkbox" name="draft_mode" value="1" /> <?php esc_html_e( 'Préparer sans envoyer', 'hpk-panneaupocket' ); ?></label><br />
-									<label><input type="checkbox" name="create_wp_post" value="1" /> <?php esc_html_e( 'Créer aussi un article WordPress public', 'hpk-panneaupocket' ); ?></label>
+									<label><input type="checkbox" name="create_wp_post" value="1" <?php checked( $linked_wp_post_id > 0 ); ?> /> <?php esc_html_e( 'Créer / mettre à jour l\'article WordPress public', 'hpk-panneaupocket' ); ?></label>
+									<?php if ( $linked_wp_post_id ) : ?>
+										<span class="description"> — <a href="<?php echo esc_url( get_edit_post_link( $linked_wp_post_id, 'raw' ) ); ?>"><?php esc_html_e( 'Modifier l\'article', 'hpk-panneaupocket' ); ?></a></span>
+									<?php endif; ?>
+									<br />
+									<label><input type="checkbox" name="show_documents_in_article" value="1" <?php checked( $show_docs_in_article, '1' ); ?> /> <?php esc_html_e( 'Afficher les pièces jointes dans l\'article WordPress', 'hpk-panneaupocket' ); ?></label><br />
+									<label><input type="checkbox" name="featured_from_doc" value="1" <?php checked( $featured_from_doc, '1' ); ?> /> <?php esc_html_e( 'Utiliser la première image comme image mise en avant', 'hpk-panneaupocket' ); ?></label>
 								</td>
 							</tr>
 						</table>

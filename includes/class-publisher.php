@@ -297,6 +297,12 @@ class HPK_PP_Publisher {
 		$featured_from_doc = isset( $_POST['_panneaupocket_featured_from_doc'] );
 		HPK_PP_Document_Display::maybe_set_featured_image( $post_id, $docs, $featured_from_doc );
 
+		update_post_meta(
+			$post_id,
+			'_panneaupocket_show_documents_in_article',
+			isset( $_POST['_panneaupocket_show_documents_in_article'] ) ? '1' : '0'
+		);
+
 		if ( empty( get_post_meta( $post_id, '_panneaupocket_external_id', true ) ) ) {
 			$post_type = get_post_type( $post_id );
 			update_post_meta( $post_id, '_panneaupocket_external_id', HPK_PP_Sanitizer::get_external_id( $post_id, $post_type ) );
@@ -436,6 +442,8 @@ class HPK_PP_Publisher {
 		update_post_meta( $post_id, '_panneaupocket_use_wp_content', ! empty( $form['use_wp_content'] ) ? '1' : '0' );
 		update_post_meta( $post_id, '_panneaupocket_use_featured', ! empty( $form['use_featured'] ) ? '1' : '0' );
 		update_post_meta( $post_id, '_panneaupocket_draft_mode', ! empty( $form['draft_mode'] ) ? '1' : '0' );
+		update_post_meta( $post_id, '_panneaupocket_featured_from_doc', ! empty( $form['featured_from_doc'] ) ? '1' : '0' );
+		update_post_meta( $post_id, '_panneaupocket_show_documents_in_article', ! empty( $form['show_documents_in_article'] ) ? '1' : '0' );
 
 		$docs = array();
 		if ( ! empty( $form['documents'] ) && is_array( $form['documents'] ) ) {

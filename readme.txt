@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,12 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.2.8 =
+* Page Publication : options pièces jointes dans l'article + image mise en avant
+* Synchronisation automatique des documents vers l'article WordPress lié
+* Affichage webp/gif dans l'article (API PanneauPocket : jpg/png/pdf uniquement)
+* Récupération des documents depuis la publication liée si l'article n'en a pas
 
 = 1.2.7 =
 * Pièces jointes PanneauPocket affichées dans l'article WordPress (images + liens PDF)
@@ -87,6 +93,9 @@ Ajoutez dans `wp-config.php` :
 * Fix : menu admin bloqué par garde-fou doublons
 
 == Upgrade Notice ==
+
+= 1.2.8 =
+Options d'affichage WordPress sur la page Publication et sync des pièces jointes.
 
 = 1.2.7 =
 Pièces jointes visibles dans les articles WordPress et option image mise en avant.

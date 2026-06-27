@@ -80,6 +80,10 @@ class HPK_PP_Metabox {
 		$external   = get_post_meta( $post->ID, '_panneaupocket_external_id', true );
 		$draft_mode = get_post_meta( $post->ID, '_panneaupocket_draft_mode', true );
 		$featured_from_doc = get_post_meta( $post->ID, '_panneaupocket_featured_from_doc', true );
+		$show_docs_in_article = get_post_meta( $post->ID, '_panneaupocket_show_documents_in_article', true );
+		if ( '' === $show_docs_in_article ) {
+			$show_docs_in_article = '1';
+		}
 		$last_sync  = get_post_meta( $post->ID, '_panneaupocket_last_sync', true );
 		$http_code  = get_post_meta( $post->ID, '_panneaupocket_last_http_code', true );
 
@@ -185,6 +189,13 @@ class HPK_PP_Metabox {
 				<?php endforeach; ?>
 				<button type="button" class="button hpk-pp-add-doc"><?php esc_html_e( 'Ajouter un document', 'hpk-panneaupocket' ); ?></button>
 			</div>
+
+			<p>
+				<label>
+					<input type="checkbox" name="_panneaupocket_show_documents_in_article" value="1" <?php checked( $show_docs_in_article, '1' ); ?> />
+					<?php esc_html_e( 'Afficher les pièces jointes dans l\'article WordPress', 'hpk-panneaupocket' ); ?>
+				</label>
+			</p>
 
 			<p>
 				<label>

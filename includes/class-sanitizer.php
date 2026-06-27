@@ -118,6 +118,16 @@ class HPK_PP_Sanitizer {
 	}
 
 	/**
+	 * Check if URL is displayable as an image on WordPress (includes webp).
+	 *
+	 * @param string $url Document URL.
+	 * @return bool
+	 */
+	public static function is_display_image_url( $url ) {
+		return in_array( self::get_url_extension( $url ), array( 'jpg', 'jpeg', 'png', 'webp', 'gif' ), true );
+	}
+
+	/**
 	 * Check if URL points to a PDF.
 	 *
 	 * @param string $url Document URL.

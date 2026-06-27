@@ -41,6 +41,110 @@ class HPK_PP_Document_Display {
 	}
 
 	/**
+	 * Find WordPress post linked to a PanneauPocket sign.
+	 *
+	 * @param int $sign_id Sign post ID.
+	 * @return int
+	 */
+	public static function get_linked_wp_post_id( $sign_id ) {
+		$sign_id = absint( $sign_id );
+		if ( ! $sign_id ) {
+			return 0;
+		}
+
+		$wp_post_id = absint( get_post_meta( $sign_id, '_panneaupocket_linked_wp_post', true ) );
+		if ( $wp_post_id && 'post' === get_post_type( $wp_post_id ) ) {
+			return $wp_post_id;
+		}
+
+		$posts = get_posts(
+			array(
+				'post_type'      => 'post',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => '_panneaupocket_linked_sign',
+				'meta_value'     => $sign_id,
+			)
+		);
+
+		if ( ! empty( $posts[0] ) ) {
+			update_post_meta( $sign_id, '_panneaupocket_linked_wp_post', absint( $posts[0] ) );
+			return absint( $posts[0] );
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Sync sign data to a linked public WordPress post.
+	 *
+	 * @param int   $sign_id Sign post ID.
+	 * @param array $form Form data.
+	 * @return int WordPress post ID or 0.
+	 */
+	public static function sync_linked_wp_post( $sign_id, $form ) {
+		$sign_id = absint( $sign_id );
+		if ( ! $sign_id ) {
+			return 0;
+		}
+
+		$wp_post_id = self::get_linked_wp_post_id( $sign_id );
+		$post_data  = array(
+			'post_type'    => 'post',
+			'post_title'   => HPK_PP_Sanitizer::sanitize_title( $form['title'] ?? '' ),
+			'post_content' => wp_kses_post( $form['content'] ?? '' ),
+			'post_status'  => 'publish',
+		);
+
+		if ( $wp_post_id ) {
+			$post_data['ID'] = $wp_post_id;
+			wp_update_post( $post_data );
+		} else {
+			$wp_post_id = wp_insert_post( $post_data, true );
+			if ( is_wp_error( $wp_post_id ) || ! $wp_post_id ) {
+				return 0;
+			}
+		}
+
+		update_post_meta( $sign_id, '_panneaupocket_linked_wp_post', $wp_post_id );
+		update_post_meta( $wp_post_id, '_panneaupocket_linked_sign', $sign_id );
+		update_post_meta( $wp_post_id, '_panneaupocket_enabled', '1' );
+
+		$meta_keys = array(
+			'_panneaupocket_title'       => HPK_PP_Sanitizer::sanitize_title( $form['title'] ?? '' ),
+			'_panneaupocket_type'        => HPK_PP_Sanitizer::sanitize_type( $form['type'] ?? 'info' ),
+			'_panneaupocket_start_at'    => HPK_PP_Sanitizer::sanitize_date( $form['start_at'] ?? '' ),
+			'_panneaupocket_end_at'      => HPK_PP_Sanitizer::sanitize_date( $form['end_at'] ?? '' ),
+			'_panneaupocket_content'     => wp_kses_post( $form['content'] ?? '' ),
+			'_panneaupocket_has_custom_content' => ! empty( $form['content'] ) ? '1' : '0',
+		);
+
+		foreach ( $meta_keys as $key => $value ) {
+			update_post_meta( $wp_post_id, $key, $value );
+		}
+
+		$docs = array();
+		if ( ! empty( $form['documents'] ) && is_array( $form['documents'] ) ) {
+			foreach ( $form['documents'] as $doc ) {
+				$url = esc_url_raw( trim( (string) $doc ) );
+				if ( $url ) {
+					$docs[] = $url;
+				}
+			}
+		}
+		$docs = array_slice( $docs, 0, 5 );
+		update_post_meta( $wp_post_id, '_panneaupocket_documents', $docs );
+
+		$show_docs = ! empty( $form['show_documents_in_article'] );
+		update_post_meta( $wp_post_id, '_panneaupocket_show_documents_in_article', $show_docs ? '1' : '0' );
+
+		self::maybe_set_featured_image( $wp_post_id, $docs, ! empty( $form['featured_from_doc'] ) );
+
+		return $wp_post_id;
+	}
+
+	/**
 	 * Get sanitized document URLs for a post.
 	 *
 	 * @param int $post_id Post ID.
@@ -48,6 +152,13 @@ class HPK_PP_Document_Display {
 	 */
 	public static function get_post_documents( $post_id ) {
 		$documents = get_post_meta( $post_id, '_panneaupocket_documents', true );
+		if ( ! is_array( $documents ) || empty( array_filter( $documents ) ) ) {
+			$sign_id = absint( get_post_meta( $post_id, '_panneaupocket_linked_sign', true ) );
+			if ( $sign_id ) {
+				$documents = get_post_meta( $sign_id, '_panneaupocket_documents', true );
+			}
+		}
+
 		if ( ! is_array( $documents ) ) {
 			return array();
 		}
@@ -64,6 +175,29 @@ class HPK_PP_Document_Display {
 	}
 
 	/**
+	 * Whether documents should be appended to post content.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool
+	 */
+	public static function should_show_documents_in_article( $post_id ) {
+		$show = get_post_meta( $post_id, '_panneaupocket_show_documents_in_article', true );
+		if ( '0' === $show || 0 === $show ) {
+			return false;
+		}
+
+		$sign_id = absint( get_post_meta( $post_id, '_panneaupocket_linked_sign', true ) );
+		if ( $sign_id ) {
+			$sign_show = get_post_meta( $sign_id, '_panneaupocket_show_documents_in_article', true );
+			if ( '0' === $sign_show || 0 === $sign_show ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get first image URL from a documents list.
 	 *
 	 * @param array $documents Document URLs.
@@ -76,7 +210,7 @@ class HPK_PP_Document_Display {
 
 		foreach ( $documents as $url ) {
 			$url = esc_url_raw( trim( (string) $url ) );
-			if ( $url && HPK_PP_Sanitizer::is_image_url( $url ) ) {
+			if ( $url && HPK_PP_Sanitizer::is_display_image_url( $url ) ) {
 				return $url;
 			}
 		}
@@ -87,9 +221,9 @@ class HPK_PP_Document_Display {
 	/**
 	 * Set featured image from the first image document when enabled.
 	 *
-	 * @param int    $post_id Post ID.
-	 * @param array  $documents Document URLs.
-	 * @param bool   $enabled Whether the option is checked.
+	 * @param int   $post_id Post ID.
+	 * @param array $documents Document URLs.
+	 * @param bool  $enabled Whether the option is checked.
 	 */
 	public static function maybe_set_featured_image( $post_id, $documents, $enabled ) {
 		$post_id = absint( $post_id );
@@ -130,7 +264,7 @@ class HPK_PP_Document_Display {
 		}
 
 		$post_id = get_the_ID();
-		if ( ! $post_id ) {
+		if ( ! $post_id || ! self::should_show_documents_in_article( $post_id ) ) {
 			return $content;
 		}
 
@@ -165,7 +299,7 @@ class HPK_PP_Document_Display {
 				continue;
 			}
 
-			if ( HPK_PP_Sanitizer::is_image_url( $url ) ) {
+			if ( HPK_PP_Sanitizer::is_display_image_url( $url ) ) {
 				$items[] = sprintf(
 					'<figure class="hpk-pp-post-document hpk-pp-post-document--image"><img src="%1$s" alt="" loading="lazy" /></figure>',
 					esc_url( $url )
