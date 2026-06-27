@@ -831,8 +831,9 @@ class HPK_PP_Admin {
 										<span class="description"> — <a href="<?php echo esc_url( get_edit_post_link( $linked_wp_post_id, 'raw' ) ); ?>"><?php esc_html_e( 'Modifier l\'article', 'hpk-panneaupocket' ); ?></a></span>
 									<?php endif; ?>
 									<br />
-									<label><input type="checkbox" name="show_documents_in_article" value="1" <?php checked( $show_docs_in_article, '1' ); ?> /> <?php esc_html_e( 'Afficher les pièces jointes dans l\'article WordPress', 'hpk-panneaupocket' ); ?></label><br />
-									<label><input type="checkbox" name="featured_from_doc" value="1" <?php checked( $featured_from_doc, '1' ); ?> /> <?php esc_html_e( 'Utiliser la première image comme image mise en avant', 'hpk-panneaupocket' ); ?></label>
+									<label><input type="checkbox" name="show_documents_in_article" value="1" <?php checked( $show_docs_in_article, '1' ); ?> /> <?php esc_html_e( 'Afficher les pièces jointes dans l\'article WordPress (PDF et fichiers)', 'hpk-panneaupocket' ); ?></label><br />
+									<label><input type="checkbox" name="featured_from_doc" value="1" <?php checked( $featured_from_doc, '1' ); ?> /> <?php esc_html_e( 'Utiliser la première image comme image mise en avant (extrait)', 'hpk-panneaupocket' ); ?></label>
+									<p class="description"><?php esc_html_e( 'Si coché, la première image n\'apparaît pas dans « Pièces jointes » mais comme image d\'extrait du thème.', 'hpk-panneaupocket' ); ?></p>
 								</td>
 							</tr>
 						</table>

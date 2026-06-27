@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.8
+Stable tag: 1.2.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.2.9 =
+* Image mise en avant : import automatique depuis la bibliothèque PanneauPocket ou URL externe
+* La première image n'est plus dupliquée dans « Pièces jointes » quand l'option extrait est cochée
+* Section pièces jointes réservée aux PDF et fichiers si l'option extrait est active
 
 = 1.2.8 =
 * Page Publication : options pièces jointes dans l'article + image mise en avant
@@ -93,6 +98,9 @@ Ajoutez dans `wp-config.php` :
 * Fix : menu admin bloqué par garde-fou doublons
 
 == Upgrade Notice ==
+
+= 1.2.9 =
+Correction image d'extrait : import en médiathèque et retrait des images des pièces jointes.
 
 = 1.2.8 =
 Options d'affichage WordPress sur la page Publication et sync des pièces jointes.

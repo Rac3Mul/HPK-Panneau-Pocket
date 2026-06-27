@@ -41,6 +41,160 @@ class HPK_PP_Document_Display {
 	}
 
 	/**
+	 * Check if featured image should come from the first document.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool
+	 */
+	public static function is_featured_from_doc( $post_id ) {
+		$enabled = get_post_meta( $post_id, '_panneaupocket_featured_from_doc', true );
+		if ( '1' === $enabled || 1 === $enabled ) {
+			return true;
+		}
+
+		$sign_id = absint( get_post_meta( $post_id, '_panneaupocket_linked_sign', true ) );
+		if ( $sign_id ) {
+			$sign_enabled = get_post_meta( $sign_id, '_panneaupocket_featured_from_doc', true );
+			return '1' === $sign_enabled || 1 === $sign_enabled;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Compare two document URLs (ignores query string).
+	 *
+	 * @param string $a URL A.
+	 * @param string $b URL B.
+	 * @return bool
+	 */
+	public static function urls_match( $a, $b ) {
+		$a = untrailingslashit( (string) strtok( $a, '?' ) );
+		$b = untrailingslashit( (string) strtok( $b, '?' ) );
+		return $a === $b;
+	}
+
+	/**
+	 * Resolve or import a media attachment from a document URL.
+	 *
+	 * @param string $url Image URL.
+	 * @param int    $post_id Parent post ID.
+	 * @return int Attachment ID or 0.
+	 */
+	public static function resolve_attachment_id( $url, $post_id = 0 ) {
+		$url = esc_url_raw( trim( $url ) );
+		if ( empty( $url ) ) {
+			return 0;
+		}
+
+		$existing = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => '_hpk_pp_source_url',
+				'meta_value'     => $url,
+			)
+		);
+		if ( ! empty( $existing[0] ) ) {
+			return absint( $existing[0] );
+		}
+
+		$attachment_id = attachment_url_to_postid( $url );
+		if ( ! $attachment_id ) {
+			$attachment_id = attachment_url_to_postid( strtok( $url, '?' ) );
+		}
+		if ( $attachment_id ) {
+			update_post_meta( $attachment_id, '_hpk_pp_source_url', $url );
+			return absint( $attachment_id );
+		}
+
+		return self::import_image_as_attachment( $url, $post_id );
+	}
+
+	/**
+	 * Import an image URL into the WordPress media library.
+	 *
+	 * @param string $url Image URL.
+	 * @param int    $post_id Parent post ID.
+	 * @return int Attachment ID or 0.
+	 */
+	private static function import_image_as_attachment( $url, $post_id = 0 ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$file_array = null;
+
+		if ( 0 === strpos( $url, HPK_PP_URL ) ) {
+			$file_path = HPK_PP_PATH . substr( $url, strlen( HPK_PP_URL ) );
+			if ( ! file_exists( $file_path ) ) {
+				return 0;
+			}
+			$tmp = wp_tempnam( basename( $file_path ) );
+			if ( ! $tmp || ! copy( $file_path, $tmp ) ) {
+				return 0;
+			}
+			$file_array = array(
+				'name'     => basename( $file_path ),
+				'tmp_name' => $tmp,
+			);
+		} else {
+			$tmp = download_url( $url );
+			if ( is_wp_error( $tmp ) ) {
+				return 0;
+			}
+			$filename = basename( wp_parse_url( $url, PHP_URL_PATH ) );
+			if ( empty( $filename ) ) {
+				$filename = 'panneaupocket-image.jpg';
+			}
+			$file_array = array(
+				'name'     => $filename,
+				'tmp_name' => $tmp,
+			);
+		}
+
+		$attachment_id = media_handle_sideload( $file_array, $post_id );
+		if ( is_wp_error( $attachment_id ) ) {
+			if ( ! empty( $file_array['tmp_name'] ) && file_exists( $file_array['tmp_name'] ) ) {
+				wp_delete_file( $file_array['tmp_name'] );
+			}
+			return 0;
+		}
+
+		update_post_meta( $attachment_id, '_hpk_pp_source_url', $url );
+		return absint( $attachment_id );
+	}
+
+	/**
+	 * Remove the featured image document from the public attachments list.
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param array $documents Document URLs.
+	 * @return array
+	 */
+	public static function filter_documents_for_display( $post_id, $documents ) {
+		if ( ! self::is_featured_from_doc( $post_id ) ) {
+			return $documents;
+		}
+
+		$first_image = self::get_first_image_url( $documents );
+		if ( empty( $first_image ) ) {
+			return $documents;
+		}
+
+		$filtered = array();
+		foreach ( $documents as $url ) {
+			if ( ! self::urls_match( $url, $first_image ) ) {
+				$filtered[] = $url;
+			}
+		}
+
+		return array_values( $filtered );
+	}
+
+	/**
 	 * Find WordPress post linked to a PanneauPocket sign.
 	 *
 	 * @param int $sign_id Sign post ID.
@@ -242,13 +396,11 @@ class HPK_PP_Document_Display {
 			return;
 		}
 
-		$attachment_id = attachment_url_to_postid( $image_url );
-		if ( ! $attachment_id ) {
-			$attachment_id = attachment_url_to_postid( strtok( $image_url, '?' ) );
-		}
+		$attachment_id = self::resolve_attachment_id( $image_url, $post_id );
 
 		if ( $attachment_id ) {
 			set_post_thumbnail( $post_id, $attachment_id );
+			update_post_meta( $post_id, '_panneaupocket_featured_doc_url', $image_url );
 		}
 	}
 
@@ -269,11 +421,12 @@ class HPK_PP_Document_Display {
 		}
 
 		$documents = self::get_post_documents( $post_id );
+		$documents = self::filter_documents_for_display( $post_id, $documents );
 		if ( empty( $documents ) ) {
 			return $content;
 		}
 
-		$html = self::render_documents_html( $documents );
+		$html = self::render_documents_html( $documents, $post_id );
 		if ( empty( $html ) ) {
 			return $content;
 		}
@@ -285,10 +438,19 @@ class HPK_PP_Document_Display {
 	 * Build HTML for document list.
 	 *
 	 * @param array $documents Document URLs.
+	 * @param int   $post_id   Post ID (optional, skips images used as featured).
 	 * @return string
 	 */
-	public static function render_documents_html( $documents ) {
+	public static function render_documents_html( $documents, $post_id = 0 ) {
 		if ( empty( $documents ) || ! is_array( $documents ) ) {
+			return '';
+		}
+
+		if ( $post_id ) {
+			$documents = self::filter_documents_for_display( $post_id, $documents );
+		}
+
+		if ( empty( $documents ) ) {
 			return '';
 		}
 
@@ -300,6 +462,9 @@ class HPK_PP_Document_Display {
 			}
 
 			if ( HPK_PP_Sanitizer::is_display_image_url( $url ) ) {
+				if ( $post_id && self::is_featured_from_doc( $post_id ) ) {
+					continue;
+				}
 				$items[] = sprintf(
 					'<figure class="hpk-pp-post-document hpk-pp-post-document--image"><img src="%1$s" alt="" loading="lazy" /></figure>',
 					esc_url( $url )

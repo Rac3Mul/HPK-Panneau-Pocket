@@ -193,14 +193,14 @@ class HPK_PP_Metabox {
 			<p>
 				<label>
 					<input type="checkbox" name="_panneaupocket_show_documents_in_article" value="1" <?php checked( $show_docs_in_article, '1' ); ?> />
-					<?php esc_html_e( 'Afficher les pièces jointes dans l\'article WordPress', 'hpk-panneaupocket' ); ?>
+					<?php esc_html_e( 'Afficher les pièces jointes dans l\'article WordPress (PDF et fichiers)', 'hpk-panneaupocket' ); ?>
 				</label>
 			</p>
 
 			<p>
 				<label>
 					<input type="checkbox" name="_panneaupocket_featured_from_doc" value="1" <?php checked( $featured_from_doc, '1' ); ?> />
-					<?php esc_html_e( 'Utiliser la première image document comme image mise en avant', 'hpk-panneaupocket' ); ?>
+					<?php esc_html_e( 'Utiliser la première image document comme image mise en avant (extrait)', 'hpk-panneaupocket' ); ?>
 				</label>
 			</p>
 
