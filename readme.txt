@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.3.5 =
+* Aperçu Publication : espacement des paragraphes aligné sur l'éditeur (sans impact sur l'envoi API)
 
 = 1.3.4 =
 * Choix des catégories WordPress lors de la création d'un article lié depuis Publication

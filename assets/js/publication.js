@@ -116,7 +116,7 @@
 
 		var $contentDisplay = $('.hpk-pp-preview-content-display');
 		if (hasHtmlContent(content)) {
-			$contentDisplay.html(normalizeContentForPreview(content));
+			$contentDisplay.html(content);
 		} else {
 			$contentDisplay.html('<p class="hpk-pp-phone-preview__placeholder">' + (i18n.placeholderContent || 'Votre message apparaîtra ici…') + '</p>');
 		}
