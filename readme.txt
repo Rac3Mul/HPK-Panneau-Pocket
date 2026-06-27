@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.3.2 =
+* Fix : contenu API au format PanneauPocket `<p>…<br />…</p>` (l'app ignore les paragraphes multiples et les listes HTML)
+* Listes converties en lignes avec puces / numéros
+* Aperçu Publication aligné sur le payload réellement envoyé
 
 = 1.3.1 =
 * Fix : sauts de ligne (Entrée) convertis en `<br>` pour l'API PanneauPocket
@@ -109,6 +114,9 @@ Ajoutez dans `wp-config.php` :
 * Fix : menu admin bloqué par garde-fou doublons
 
 == Upgrade Notice ==
+
+= 1.3.2 =
+Correction définitive des sauts de ligne — republiez vos panneaux après mise à jour.
 
 = 1.3.1 =
 Correction des retours à la ligne dans les publications PanneauPocket — republiez vos panneaux existants.

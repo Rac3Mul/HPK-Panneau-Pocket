@@ -47,21 +47,55 @@
 		return urls;
 	}
 
+	function convertListsToBreaks(html) {
+		return html
+			.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, function (_, inner) {
+				var lines = [];
+				inner.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, function (_m, item) {
+					item = $.trim(item);
+					if (item) {
+						lines.push('• ' + item);
+					}
+				});
+				return lines.join('<br />');
+			})
+			.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, function (_, inner) {
+				var lines = [];
+				var index = 1;
+				inner.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, function (_m, item) {
+					item = $.trim(item);
+					if (item) {
+						lines.push(index + '. ' + item);
+						index++;
+					}
+				});
+				return lines.join('<br />');
+			});
+	}
+
 	function normalizeContentForPreview(html) {
 		if (!html) {
 			return html;
 		}
-		var out = html;
-		out = out.replace(/<h[23][^>]*>(.*?)<\/h[23]>/gi, '<strong>$1</strong><br>');
-		out = out.replace(/<\/p>\s*<p[^>]*>/gi, '<br>');
+		var out = convertListsToBreaks(html);
+		out = out.replace(/<h[23][^>]*>(.*?)<\/h[23]>/gi, '<strong>$1</strong><br />');
+		out = out.replace(/<\/p>\s*<p[^>]*>/gi, '<br />');
 		out = out.replace(/<p[^>]*>/gi, '');
-		out = out.replace(/<\/p>/gi, '<br>');
-		out = out.replace(/<\/div>\s*<div[^>]*>/gi, '<br>');
+		out = out.replace(/<\/p>/gi, '<br />');
+		out = out.replace(/<\/div>\s*<div[^>]*>/gi, '<br />');
 		out = out.replace(/<div[^>]*>/gi, '');
-		out = out.replace(/<\/div>/gi, '<br>');
-		out = out.replace(/(?:<br\s*\/?>\s*){3,}/gi, '<br><br>');
+		out = out.replace(/<\/div>/gi, '<br />');
+		out = out.replace(/<br\s*\/?>/gi, '<br />');
+		out = out.replace(/(?:<br\s*\/?>\s*){3,}/gi, '<br /><br />');
 		out = out.replace(/(?:<br\s*\/?>\s*)+$/i, '');
-		return out;
+		out = $.trim(out);
+		if (!out) {
+			return out;
+		}
+		if (/^<p[^>]*>[\s\S]*<\/p>$/i.test(out) && (out.match(/<p\b/gi) || []).length === 1) {
+			return out;
+		}
+		return '<p>' + out + '</p>';
 	}
 
 	function updatePreview() {

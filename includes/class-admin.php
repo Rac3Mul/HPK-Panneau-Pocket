@@ -930,7 +930,7 @@ class HPK_PP_Admin {
 							<div class="hpk-pp-phone-preview__scroll">
 								<div class="hpk-pp-phone-preview__content hpk-pp-preview-content-display">
 									<?php if ( $content ) : ?>
-										<?php echo wp_kses_post( $content ); ?>
+										<?php echo wp_kses_post( HPK_PP_Sanitizer::sanitize_content( $content ) ); ?>
 									<?php else : ?>
 										<p class="hpk-pp-phone-preview__placeholder"><?php esc_html_e( 'Votre message apparaîtra ici…', 'hpk-panneaupocket' ); ?></p>
 									<?php endif; ?>

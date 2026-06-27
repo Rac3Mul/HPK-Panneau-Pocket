@@ -92,6 +92,12 @@ class HPK_PP_Sanitizer {
 		$content = strip_shortcodes( $content );
 		$content = preg_replace( '/<(script|iframe|video|audio|form|embed|object)[^>]*>.*?<\/\1>/is', '', $content );
 		$content = preg_replace( '/<(script|iframe|video|audio|form|embed|object)[^>]*\/?>/i', '', $content );
+
+		// TinyMCE inline styles -> tags supported by PanneauPocket.
+		$content = preg_replace( '/<span[^>]*style="[^"]*text-decoration\s*:\s*underline[^"]*"[^>]*>(.*?)<\/span>/is', '<u>$1</u>', $content );
+		$content = preg_replace( '/<span[^>]*style="[^"]*line-through[^"]*"[^>]*>(.*?)<\/span>/is', '<s>$1</s>', $content );
+		$content = str_replace( array( '<b>', '</b>', '<i>', '</i>' ), array( '<strong>', '</strong>', '<em>', '</em>' ), $content );
+
 		$content = wp_kses( $content, self::allowed_html() );
 		$content = self::normalize_content_line_breaks( $content );
 
@@ -99,7 +105,9 @@ class HPK_PP_Sanitizer {
 	}
 
 	/**
-	 * Convert block markup to <br> for PanneauPocket (API expects br, not p/div).
+	 * Convert editor HTML to PanneauPocket format: one <p> block with <br /> line breaks.
+	 *
+	 * @see https://gestion.panneaupocket.com/public-api (content example: "<p></p>")
 	 *
 	 * @param string $content HTML content.
 	 * @return string
@@ -109,26 +117,87 @@ class HPK_PP_Sanitizer {
 			return '';
 		}
 
-		// Headings -> bold line + break.
-		$content = preg_replace( '/<h([23])(?:\s[^>]*)?>(.*?)<\/h\1>/is', '<strong>$2</strong><br>', $content );
+		$content = self::convert_lists_to_line_breaks( $content );
 
-		// Block elements from TinyMCE / wpautop -> line breaks.
-		$content = preg_replace( '/<\/p>\s*<p(?:\s[^>]*)?>/i', '<br>', $content );
-		$content = preg_replace( '/<\/div>\s*<div(?:\s[^>]*)?>/i', '<br>', $content );
+		$content = preg_replace( '/<h([23])(?:\s[^>]*)?>(.*?)<\/h\1>/is', '<strong>$2</strong><br />', $content );
+
+		$content = preg_replace( '/<\/p>\s*<p(?:\s[^>]*)?>/i', '<br />', $content );
+		$content = preg_replace( '/<\/div>\s*<div(?:\s[^>]*)?>/i', '<br />', $content );
 		$content = preg_replace( '/<p(?:\s[^>]*)?>/i', '', $content );
-		$content = preg_replace( '/<\/p>/i', '<br>', $content );
+		$content = preg_replace( '/<\/p>/i', '<br />', $content );
 		$content = preg_replace( '/<div(?:\s[^>]*)?>/i', '', $content );
-		$content = preg_replace( '/<\/div>/i', '<br>', $content );
+		$content = preg_replace( '/<\/div>/i', '<br />', $content );
 
-		// Text mode or pasted plain text with newlines.
-		if ( false !== strpos( $content, "\n" ) && ! preg_match( '/<(br|ul|ol|li)\b/i', $content ) ) {
-			$content = nl2br( $content );
+		if ( false !== strpos( $content, "\n" ) && ! preg_match( '/<br\b/i', $content ) ) {
+			$content = nl2br( $content, false );
 		}
 
-		$content = preg_replace( '/(?:<br\s*\/?>\s*){3,}/i', '<br><br>', $content );
+		$content = preg_replace( '/<br\s*\/?>/i', '<br />', $content );
+		$content = preg_replace( '/&nbsp;/i', ' ', $content );
+		$content = preg_replace( '/(?:<br\s*\/?>\s*){3,}/i', '<br /><br />', $content );
 		$content = preg_replace( '/(?:<br\s*\/?>\s*)+$/i', '', $content );
+		$content = trim( $content );
 
-		return trim( $content );
+		if ( '' === $content ) {
+			return '';
+		}
+
+		if ( preg_match( '/^<p(?:\s[^>]*)?>.*<\/p>$/is', $content ) && 1 === preg_match_all( '/<p\b/i', $content ) ) {
+			return $content;
+		}
+
+		return '<p>' . $content . '</p>';
+	}
+
+	/**
+	 * Flatten ul/ol into br-separated lines (PanneauPocket ignores list block tags).
+	 *
+	 * @param string $content HTML content.
+	 * @return string
+	 */
+	private static function convert_lists_to_line_breaks( $content ) {
+		$content = preg_replace_callback(
+			'/<ul(?:\s[^>]*)?>(.*?)<\/ul>/is',
+			static function ( $matches ) {
+				return self::extract_list_lines( $matches[1], false );
+			},
+			$content
+		);
+
+		$content = preg_replace_callback(
+			'/<ol(?:\s[^>]*)?>(.*?)<\/ol>/is',
+			static function ( $matches ) {
+				return self::extract_list_lines( $matches[1], true );
+			},
+			$content
+		);
+
+		return $content;
+	}
+
+	/**
+	 * @param string $inner List inner HTML.
+	 * @param bool   $ordered Ordered list.
+	 * @return string
+	 */
+	private static function extract_list_lines( $inner, $ordered ) {
+		if ( ! preg_match_all( '/<li(?:\s[^>]*)?>(.*?)<\/li>/is', $inner, $items, PREG_SET_ORDER ) ) {
+			return '';
+		}
+
+		$lines = array();
+		$index = 1;
+		foreach ( $items as $item ) {
+			$line = trim( $item[1] );
+			if ( '' === $line ) {
+				continue;
+			}
+			$prefix          = $ordered ? $index . '. ' : '• ';
+			$lines[]         = $prefix . $line;
+			++$index;
+		}
+
+		return implode( '<br />', $lines );
 	}
 
 	/**
