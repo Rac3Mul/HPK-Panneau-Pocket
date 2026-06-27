@@ -79,6 +79,7 @@ class HPK_PP_Metabox {
 		$status     = get_post_meta( $post->ID, '_panneaupocket_last_status', true ) ?: 'non_envoye';
 		$external   = get_post_meta( $post->ID, '_panneaupocket_external_id', true );
 		$draft_mode = get_post_meta( $post->ID, '_panneaupocket_draft_mode', true );
+		$featured_from_doc = get_post_meta( $post->ID, '_panneaupocket_featured_from_doc', true );
 		$last_sync  = get_post_meta( $post->ID, '_panneaupocket_last_sync', true );
 		$http_code  = get_post_meta( $post->ID, '_panneaupocket_last_http_code', true );
 
@@ -184,6 +185,13 @@ class HPK_PP_Metabox {
 				<?php endforeach; ?>
 				<button type="button" class="button hpk-pp-add-doc"><?php esc_html_e( 'Ajouter un document', 'hpk-panneaupocket' ); ?></button>
 			</div>
+
+			<p>
+				<label>
+					<input type="checkbox" name="_panneaupocket_featured_from_doc" value="1" <?php checked( $featured_from_doc, '1' ); ?> />
+					<?php esc_html_e( 'Utiliser la première image document comme image mise en avant', 'hpk-panneaupocket' ); ?>
+				</label>
+			</p>
 
 			<p>
 				<strong><?php esc_html_e( 'Identifiant externe :', 'hpk-panneaupocket' ); ?></strong>

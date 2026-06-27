@@ -94,6 +94,40 @@ class HPK_PP_Sanitizer {
 	}
 
 	/**
+	 * Get lowercase file extension from a URL path.
+	 *
+	 * @param string $url Document URL.
+	 * @return string
+	 */
+	public static function get_url_extension( $url ) {
+		$path = wp_parse_url( $url, PHP_URL_PATH );
+		if ( empty( $path ) ) {
+			return '';
+		}
+		return strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+	}
+
+	/**
+	 * Check if URL points to an allowed image (jpg/png).
+	 *
+	 * @param string $url Document URL.
+	 * @return bool
+	 */
+	public static function is_image_url( $url ) {
+		return in_array( self::get_url_extension( $url ), array( 'jpg', 'jpeg', 'png' ), true );
+	}
+
+	/**
+	 * Check if URL points to a PDF.
+	 *
+	 * @param string $url Document URL.
+	 * @return bool
+	 */
+	public static function is_pdf_url( $url ) {
+		return 'pdf' === self::get_url_extension( $url );
+	}
+
+	/**
 	 * Validate and sanitize document URLs.
 	 *
 	 * @param array $urls Document URLs.
@@ -123,8 +157,7 @@ class HPK_PP_Sanitizer {
 				continue;
 			}
 
-			$path = wp_parse_url( $url, PHP_URL_PATH );
-			$ext  = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+			$ext = self::get_url_extension( $url );
 
 			if ( ! in_array( $ext, $allowed_ext, true ) ) {
 				$errors[] = sprintf(

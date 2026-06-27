@@ -27,10 +27,18 @@ if ( ! $query->have_posts() ) {
 		$type     = get_post_meta( get_the_ID(), '_panneaupocket_type', true ) ?: 'info';
 		$pp_title = get_post_meta( get_the_ID(), '_panneaupocket_title', true ) ?: get_the_title();
 		$link     = 'hpk_pp_sign' === get_post_type() ? '' : get_permalink();
+		$doc_image = '';
+		if ( $show_image && ! has_post_thumbnail() ) {
+			$doc_image = HPK_PP_Document_Display::get_first_image_url(
+				HPK_PP_Document_Display::get_post_documents( get_the_ID() )
+			);
+		}
 		?>
 		<article class="hpk-pp-news-item hpk-pp-news-item--<?php echo esc_attr( $type ); ?>">
 			<?php if ( $show_image && has_post_thumbnail() ) : ?>
 				<?php if ( $link ) : ?><a href="<?php echo esc_url( $link ); ?>" class="hpk-pp-news-thumb"><?php the_post_thumbnail( 'medium' ); ?></a><?php else : ?><div class="hpk-pp-news-thumb"><?php the_post_thumbnail( 'medium' ); ?></div><?php endif; ?>
+			<?php elseif ( $show_image && $doc_image ) : ?>
+				<?php if ( $link ) : ?><a href="<?php echo esc_url( $link ); ?>" class="hpk-pp-news-thumb"><img src="<?php echo esc_url( $doc_image ); ?>" alt="" loading="lazy" class="hpk-pp-news-doc-image" /></a><?php else : ?><div class="hpk-pp-news-thumb"><img src="<?php echo esc_url( $doc_image ); ?>" alt="" loading="lazy" class="hpk-pp-news-doc-image" /></div><?php endif; ?>
 			<?php endif; ?>
 			<div class="hpk-pp-news-body">
 				<?php if ( $show_type ) : ?>

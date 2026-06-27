@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.2.7 =
+* Pièces jointes PanneauPocket affichées dans l'article WordPress (images + liens PDF)
+* Option : définir la première image document comme image mise en avant
+* Shortcodes actualités : vignette depuis un document image si pas d'image mise en avant
 
 = 1.2.6 =
 * Retrait d'un document/image (bouton ×)
@@ -82,6 +87,9 @@ Ajoutez dans `wp-config.php` :
 * Fix : menu admin bloqué par garde-fou doublons
 
 == Upgrade Notice ==
+
+= 1.2.7 =
+Pièces jointes visibles dans les articles WordPress et option image mise en avant.
 
 = 1.2.3 =
 Compatibilité WordPress 7.0 et releases automatiques.

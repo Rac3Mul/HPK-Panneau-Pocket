@@ -320,3 +320,51 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+/* Post attachments (PanneauPocket documents) */
+.hpk-pp-post-documents {
+	margin-top: 2rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid #e5e5e5;
+}
+
+.hpk-pp-post-documents__title {
+	margin: 0 0 1rem;
+	font-size: 1.25rem;
+}
+
+.hpk-pp-post-document {
+	margin: 0 0 1rem;
+}
+
+.hpk-pp-post-document--image img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 6px;
+}
+
+.hpk-pp-post-document--pdf a,
+.hpk-pp-post-document--file a {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.5rem 0.875rem;
+	background: #f5f7fa;
+	border: 1px solid #dde3ea;
+	border-radius: 6px;
+	color: var(--hpk-pp-primary, #0066cc);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.hpk-pp-post-document--pdf a:hover,
+.hpk-pp-post-document--file a:hover {
+	background: #eef3f9;
+}
+
+.hpk-pp-news-doc-image {
+	display: block;
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+}

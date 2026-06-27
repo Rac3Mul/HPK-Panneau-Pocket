@@ -294,6 +294,9 @@ class HPK_PP_Publisher {
 		}
 		update_post_meta( $post_id, '_panneaupocket_documents', array_slice( $docs, 0, 5 ) );
 
+		$featured_from_doc = isset( $_POST['_panneaupocket_featured_from_doc'] );
+		HPK_PP_Document_Display::maybe_set_featured_image( $post_id, $docs, $featured_from_doc );
+
 		if ( empty( get_post_meta( $post_id, '_panneaupocket_external_id', true ) ) ) {
 			$post_type = get_post_type( $post_id );
 			update_post_meta( $post_id, '_panneaupocket_external_id', HPK_PP_Sanitizer::get_external_id( $post_id, $post_type ) );
