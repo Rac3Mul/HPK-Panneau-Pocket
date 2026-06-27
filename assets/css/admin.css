@@ -851,13 +851,18 @@
 }
 
 .hpk-pp-phone-preview__content p {
-	margin: 0 0 0.75em;
+	margin: 0;
+	padding: 0;
 }
 
 .hpk-pp-phone-preview__content br {
 	display: block;
-	margin-bottom: 0.35em;
-	content: '';
+	margin-top: 0.65em;
+	line-height: 0;
+}
+
+.hpk-pp-phone-preview__content br:first-child {
+	margin-top: 0;
 }
 
 .hpk-pp-phone-preview__content ul,

@@ -78,6 +78,7 @@
 			return html;
 		}
 		var out = convertListsToBreaks(html);
+		out = out.replace(/<(?:p|div)[^>]*>\s*(?:&nbsp;|<br[^>]*>)?\s*<\/(?:p|div)>/gi, '<br />');
 		out = out.replace(/<h[23][^>]*>(.*?)<\/h[23]>/gi, '<strong>$1</strong><br />');
 		out = out.replace(/<\/p>\s*<p[^>]*>/gi, '<br />');
 		out = out.replace(/<p[^>]*>/gi, '');

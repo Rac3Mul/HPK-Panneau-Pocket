@@ -121,6 +121,9 @@ class HPK_PP_Sanitizer {
 
 		$content = preg_replace( '/<h([23])(?:\s[^>]*)?>(.*?)<\/h\1>/is', '<strong>$2</strong><br />', $content );
 
+		// Empty lines from TinyMCE (Enter twice) before merging paragraphs.
+		$content = self::convert_empty_blocks_to_breaks( $content );
+
 		$content = preg_replace( '/<\/p>\s*<p(?:\s[^>]*)?>/i', '<br />', $content );
 		$content = preg_replace( '/<\/div>\s*<div(?:\s[^>]*)?>/i', '<br />', $content );
 		$content = preg_replace( '/<p(?:\s[^>]*)?>/i', '', $content );
@@ -147,6 +150,20 @@ class HPK_PP_Sanitizer {
 		}
 
 		return '<p>' . $content . '</p>';
+	}
+
+	/**
+	 * Turn empty editor blocks into line breaks (double Enter in TinyMCE).
+	 *
+	 * @param string $content HTML content.
+	 * @return string
+	 */
+	private static function convert_empty_blocks_to_breaks( $content ) {
+		return preg_replace(
+			'/<(?:p|div)(?:\s[^>]*)?>\s*(?:&nbsp;|<br\s[^>]*\/?>)?\s*<\/(?:p|div)>/i',
+			'<br />',
+			$content
+		);
 	}
 
 	/**
