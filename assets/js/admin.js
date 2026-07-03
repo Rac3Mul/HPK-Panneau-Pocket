@@ -222,4 +222,13 @@
 
 	updateLogoPreview();
 
+	function toggleFloatingOffsetFields() {
+		var pos = $('select[name="hpk_pp_floating_position"]').val();
+		$('.hpk-pp-floating-offset-left-wrap').toggle(pos === 'bottom-left');
+		$('.hpk-pp-floating-offset-right-wrap').toggle(pos === 'bottom-right');
+	}
+
+	$(document).on('change', 'select[name="hpk_pp_floating_position"]', toggleFloatingOffsetFields);
+	toggleFloatingOffsetFields();
+
 })(jQuery);

@@ -127,6 +127,9 @@ class HPK_PP_Admin {
 		$floating_settings = array(
 			'hpk_pp_floating_enabled',
 			'hpk_pp_floating_position',
+			'hpk_pp_floating_offset_bottom',
+			'hpk_pp_floating_offset_left',
+			'hpk_pp_floating_offset_right',
 			'hpk_pp_floating_mode',
 			'hpk_pp_floating_width',
 			'hpk_pp_floating_height',
@@ -140,7 +143,10 @@ class HPK_PP_Admin {
 		);
 
 		foreach ( $floating_settings as $setting ) {
-			register_setting( 'hpk_pp_floating_settings', $setting, array( 'sanitize_callback' => array( $this, 'sanitize_setting' ) ) );
+			$callback = in_array( $setting, array( 'hpk_pp_floating_offset_bottom', 'hpk_pp_floating_offset_left', 'hpk_pp_floating_offset_right' ), true )
+				? array( $this, 'sanitize_pixel_offset' )
+				: array( $this, 'sanitize_setting' );
+			register_setting( 'hpk_pp_floating_settings', $setting, array( 'sanitize_callback' => $callback ) );
 		}
 	}
 
@@ -215,6 +221,17 @@ class HPK_PP_Admin {
 			return array_map( 'sanitize_text_field', $value );
 		}
 		return sanitize_text_field( $value );
+	}
+
+	/**
+	 * Sanitize pixel offset (0–500).
+	 *
+	 * @param mixed $value Offset value.
+	 * @return string
+	 */
+	public function sanitize_pixel_offset( $value ) {
+		$value = absint( $value );
+		return (string) max( 0, min( 500, $value ) );
 	}
 
 	/**
@@ -620,6 +637,40 @@ class HPK_PP_Admin {
 					),
 					get_option( 'hpk_pp_floating_position', 'bottom-right' )
 				);
+				HPK_PP_Admin_UI::field_input(
+					'number',
+					'hpk_pp_floating_offset_bottom',
+					__( 'Distance depuis le bas (px)', 'hpk-panneaupocket' ),
+					get_option( 'hpk_pp_floating_offset_bottom', '20' ),
+					__( 'Augmentez pour remonter le bouton, diminuez pour le rapprocher du bord.', 'hpk-panneaupocket' ),
+					array( 'min' => '0', 'max' => '500', 'step' => '1' )
+				);
+				?>
+				<div class="hpk-pp-floating-offset-left-wrap">
+				<?php
+				HPK_PP_Admin_UI::field_input(
+					'number',
+					'hpk_pp_floating_offset_left',
+					__( 'Distance depuis la gauche (px)', 'hpk-panneaupocket' ),
+					get_option( 'hpk_pp_floating_offset_left', '20' ),
+					__( 'Utilisé lorsque la position est « Bas gauche ».', 'hpk-panneaupocket' ),
+					array( 'min' => '0', 'max' => '500', 'step' => '1' )
+				);
+				?>
+				</div>
+				<div class="hpk-pp-floating-offset-right-wrap">
+				<?php
+				HPK_PP_Admin_UI::field_input(
+					'number',
+					'hpk_pp_floating_offset_right',
+					__( 'Distance depuis la droite (px)', 'hpk-panneaupocket' ),
+					get_option( 'hpk_pp_floating_offset_right', '20' ),
+					__( 'Utilisé lorsque la position est « Bas droite ».', 'hpk-panneaupocket' ),
+					array( 'min' => '0', 'max' => '500', 'step' => '1' )
+				);
+				?>
+				</div>
+				<?php
 				HPK_PP_Admin_UI::field_select(
 					'hpk_pp_floating_mode',
 					__( 'Mode iframe', 'hpk-panneaupocket' ),

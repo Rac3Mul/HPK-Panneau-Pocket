@@ -3,7 +3,7 @@
  * Plugin Name:       HPK PanneauPocket Connect
  * Plugin URI:        https://panneaupocket.com
  * Description:       Intégration PanneauPocket : widget flottant, shortcodes, publication d'actualités WordPress vers l'API officielle.
- * Version:           1.3.5
+ * Version:           1.3.6
  * Requires at least: 6.0
  * Tested up to:      7.0
  * Requires PHP:      7.4
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'HPK_PP_LOADED_FROM', __FILE__ );
-define( 'HPK_PP_VERSION', '1.3.5' );
+define( 'HPK_PP_VERSION', '1.3.6' );
 define( 'HPK_PP_CANONICAL_BASENAME', 'hpk-panneaupocket/hpk-panneaupocket.php' );
 define( 'HPK_PP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HPK_PP_URL', plugin_dir_url( __FILE__ ) );
@@ -254,6 +254,9 @@ final class HPK_PanneauPocket {
 			'hpk_pp_responsive_mobile'        => '1',
 			'hpk_pp_floating_enabled'         => '0',
 			'hpk_pp_floating_position'        => 'bottom-right',
+			'hpk_pp_floating_offset_bottom'   => '20',
+			'hpk_pp_floating_offset_left'     => '20',
+			'hpk_pp_floating_offset_right'    => '20',
 			'hpk_pp_floating_mode'            => 'widget',
 			'hpk_pp_floating_width'           => '330',
 			'hpk_pp_floating_height'          => '518',

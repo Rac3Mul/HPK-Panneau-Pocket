@@ -70,6 +70,7 @@ class HPK_PP_Floating_Widget {
 		$h_mobile = get_option( 'hpk_pp_floating_height_mobile', '75vh' );
 		$btn_color = get_option( 'hpk_pp_color_button', '#ffffff' );
 		$animations = '1' === get_option( 'hpk_pp_animations', '1' );
+		$offsets    = self::get_position_offsets();
 
 		if ( '' === (string) $width ) {
 			$width = '330';
@@ -79,18 +80,32 @@ class HPK_PP_Floating_Widget {
 		}
 
 		$css = sprintf(
-			'.hpk-pp-floating { --hpk-pp-panel-width: %spx; --hpk-pp-panel-height: %spx; --hpk-pp-panel-width-mobile: %s; --hpk-pp-panel-height-mobile: %s; --hpk-pp-button: %s; }
-			.hpk-pp-floating--bottom-left { left: 20px; right: auto; }
-			.hpk-pp-floating--bottom-right { right: 20px; left: auto; }
+			'.hpk-pp-floating { --hpk-pp-panel-width: %spx; --hpk-pp-panel-height: %spx; --hpk-pp-panel-width-mobile: %s; --hpk-pp-panel-height-mobile: %s; --hpk-pp-button: %s; --hpk-pp-floating-bottom: %dpx; --hpk-pp-floating-left: %dpx; --hpk-pp-floating-right: %dpx; }
 			%s',
 			esc_attr( $width ),
 			esc_attr( $height ),
 			esc_attr( $w_mobile ),
 			esc_attr( $h_mobile ),
 			esc_attr( $btn_color ),
+			$offsets['bottom'],
+			$offsets['left'],
+			$offsets['right'],
 			$animations ? '' : '.hpk-pp-floating * { transition: none !important; animation: none !important; }'
 		);
 		wp_add_inline_style( 'hpk-pp-frontend', $css );
+	}
+
+	/**
+	 * Get sanitized floating widget position offsets in pixels.
+	 *
+	 * @return array{bottom:int,left:int,right:int}
+	 */
+	public static function get_position_offsets() {
+		return array(
+			'bottom' => max( 0, min( 500, absint( get_option( 'hpk_pp_floating_offset_bottom', 20 ) ) ) ),
+			'left'   => max( 0, min( 500, absint( get_option( 'hpk_pp_floating_offset_left', 20 ) ) ) ),
+			'right'  => max( 0, min( 500, absint( get_option( 'hpk_pp_floating_offset_right', 20 ) ) ) ),
+		);
 	}
 
 	/**
