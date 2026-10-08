@@ -40,6 +40,7 @@ class HPK_PP_Shortcodes {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend' ) );
 		add_shortcode( 'panneaupocket_widget', array( $this, 'render_widget' ) );
 		add_shortcode( 'panneaupocket_news', array( $this, 'render_news' ) );
+		add_shortcode( 'panneaupocket_agenda', array( $this, 'render_agenda' ) );
 	}
 
 	/**
@@ -206,6 +207,55 @@ class HPK_PP_Shortcodes {
 		ob_start();
 		include $template;
 		wp_reset_postdata();
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render agenda shortcode.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function render_agenda( $atts ) {
+		return self::get_agenda_html( $atts );
+	}
+
+	/**
+	 * Agenda HTML from the public PanneauPocket city page.
+	 *
+	 * @param array $atts Attributes.
+	 * @return string
+	 */
+	public static function get_agenda_html( $atts = array() ) {
+		$atts = shortcode_atts(
+			array(
+				'limit'          => '6',
+				'layout'         => 'list',
+				'show_image'     => 'true',
+				'show_excerpt'   => 'true',
+				'excerpt_length' => '140',
+				'include_past'   => 'false',
+				'city_id'        => '',
+			),
+			$atts,
+			'panneaupocket_agenda'
+		);
+
+		$layout = in_array( $atts['layout'], array( 'list', 'grid' ), true ) ? $atts['layout'] : 'list';
+		$events = HPK_PP_Agenda::get_events(
+			array(
+				'city_id'      => $atts['city_id'],
+				'limit'        => absint( $atts['limit'] ),
+				'include_past' => filter_var( $atts['include_past'], FILTER_VALIDATE_BOOLEAN ),
+			)
+		);
+
+		$show_image     = filter_var( $atts['show_image'], FILTER_VALIDATE_BOOLEAN );
+		$show_excerpt   = filter_var( $atts['show_excerpt'], FILTER_VALIDATE_BOOLEAN );
+		$excerpt_length = max( 40, absint( $atts['excerpt_length'] ) );
+
+		ob_start();
+		include HPK_PP_PATH . 'templates/agenda.php';
 		return ob_get_clean();
 	}
 }

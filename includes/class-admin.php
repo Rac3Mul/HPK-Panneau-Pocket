@@ -739,6 +739,8 @@ class HPK_PP_Admin {
 			'[panneaupocket_news limit="6" layout="grid" show_date="true" show_image="true"]',
 			'[panneaupocket_news layout="list" pagination="true" per_page="10"]',
 			'[panneaupocket_news layout="compact" show_type="true" excerpt_length="80"]',
+			'[panneaupocket_agenda limit="6" layout="list"]',
+			'[panneaupocket_agenda layout="grid" limit="8" show_image="true"]',
 		);
 		?>
 		<div class="wrap hpk-pp-admin">
@@ -756,6 +758,15 @@ class HPK_PP_Admin {
 				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_widget]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
 			</div>
 			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : mode, auto_navigation, bg_color, city_id, width, height', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
+
+			<?php HPK_PP_Admin_UI::card_open( __( 'Agenda public', 'hpk-panneaupocket' ) ); ?>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Affiche les panneaux marqués « événement » de la page publique PanneauPocket (pas d\'API agenda). Mise en cache 30 minutes. Nécessite le City ID.', 'hpk-panneaupocket' ); ?></p>
+			<div class="hpk-pp-copy-block">
+				<code>[panneaupocket_agenda]</code>
+				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_agenda]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
+			</div>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : limit, layout (list/grid), show_image, show_excerpt, excerpt_length, include_past, city_id. Widget Elementor : « PanneauPocket Agenda ».', 'hpk-panneaupocket' ); ?></p>
 			<?php HPK_PP_Admin_UI::card_close(); ?>
 
 			<?php HPK_PP_Admin_UI::card_open( __( 'Actualités synchronisées', 'hpk-panneaupocket' ) ); ?>

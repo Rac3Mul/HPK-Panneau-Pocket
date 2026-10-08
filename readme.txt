@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.3.7 =
+* Agenda public : shortcode [panneaupocket_agenda] et widget Elementor « PanneauPocket Agenda »
+* Lecture des événements marqués sur la page publique (pas d'API agenda), cache 30 minutes
 
 = 1.3.6 =
 * Widget flottant : réglage fin de la position en pixels (bas, gauche, droite)

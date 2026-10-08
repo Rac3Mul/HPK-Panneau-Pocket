@@ -3,7 +3,7 @@
  * Plugin Name:       HPK PanneauPocket Connect
  * Plugin URI:        https://panneaupocket.com
  * Description:       Intégration PanneauPocket : widget flottant, shortcodes, publication d'actualités WordPress vers l'API officielle.
- * Version:           1.3.6
+ * Version:           1.3.7
  * Requires at least: 6.0
  * Tested up to:      7.0
  * Requires PHP:      7.4
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'HPK_PP_LOADED_FROM', __FILE__ );
-define( 'HPK_PP_VERSION', '1.3.6' );
+define( 'HPK_PP_VERSION', '1.3.7' );
 define( 'HPK_PP_CANONICAL_BASENAME', 'hpk-panneaupocket/hpk-panneaupocket.php' );
 define( 'HPK_PP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HPK_PP_URL', plugin_dir_url( __FILE__ ) );
@@ -54,6 +54,7 @@ function hpk_pp_missing_required_files() {
 		'includes/class-elementor.php',
 		'includes/class-document-display.php',
 		'includes/class-admin-ui.php',
+		'includes/class-agenda.php',
 	);
 
 	$missing = array();
@@ -118,6 +119,7 @@ require_once HPK_PP_PATH . 'includes/class-blocks.php';
 require_once HPK_PP_PATH . 'includes/class-elementor.php';
 require_once HPK_PP_PATH . 'includes/class-image-library.php';
 require_once HPK_PP_PATH . 'includes/class-document-display.php';
+require_once HPK_PP_PATH . 'includes/class-agenda.php';
 require_once HPK_PP_PATH . 'includes/class-updater.php';
 
 /**
@@ -229,6 +231,7 @@ final class HPK_PanneauPocket {
 	 */
 	public function deactivate() {
 		wp_clear_scheduled_hook( 'hpk_pp_purge_logs' );
+		wp_clear_scheduled_hook( 'hpk_pp_refresh_agenda' );
 		flush_rewrite_rules();
 	}
 
@@ -405,6 +408,7 @@ final class HPK_PanneauPocket {
 		HPK_PP_Publisher::instance();
 		HPK_PP_Document_Display::instance();
 		HPK_PP_Shortcodes::instance();
+		new HPK_PP_Agenda();
 		HPK_PP_Floating_Widget::instance();
 		HPK_PP_Widgets::instance();
 		HPK_PP_Blocks::instance();

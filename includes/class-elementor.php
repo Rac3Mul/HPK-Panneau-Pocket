@@ -64,8 +64,10 @@ class HPK_PP_Elementor {
 	public function register_widgets( $widgets_manager ) {
 		require_once HPK_PP_PATH . 'includes/elementor/widget-iframe.php';
 		require_once HPK_PP_PATH . 'includes/elementor/widget-news.php';
+		require_once HPK_PP_PATH . 'includes/elementor/widget-agenda.php';
 
 		$widgets_manager->register( new HPK_PP_Elementor_Widget_Iframe() );
 		$widgets_manager->register( new HPK_PP_Elementor_Widget_News() );
+		$widgets_manager->register( new HPK_PP_Elementor_Widget_Agenda() );
 	}
 }
