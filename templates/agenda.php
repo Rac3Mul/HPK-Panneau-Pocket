@@ -9,6 +9,7 @@
  * @var bool   $show_image Show image.
  * @var bool   $show_excerpt Show excerpt.
  * @var int    $excerpt_length Excerpt length.
+ * @var int    $autoplay Autoplay delay in ms, 0 to disable.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,15 +21,17 @@ if ( empty( $events ) ) {
 	return;
 }
 
-$dates = array();
+$dates    = array();
+$is_slider = ( 'slider' === $layout );
+$autoplay  = isset( $autoplay ) ? absint( $autoplay ) : 0;
 foreach ( $events as $event ) {
 	if ( ! empty( $event['date'] ) && ! isset( $dates[ $event['date'] ] ) ) {
 		$dates[ $event['date'] ] = ! empty( $event['date_label'] ) ? $event['date_label'] : mysql2date( 'd/m/Y', $event['date'] );
 	}
 }
 ?>
-<div class="hpk-pp-agenda-wrap">
-	<?php if ( count( $dates ) > 1 ) : ?>
+<div class="hpk-pp-agenda-wrap<?php echo $is_slider ? ' hpk-pp-agenda-wrap--slider' : ''; ?>">
+	<?php if ( ! $is_slider && count( $dates ) > 1 ) : ?>
 		<div class="hpk-pp-agenda__filters" role="tablist">
 			<button type="button" class="hpk-pp-agenda__filter is-active" data-date=""><?php esc_html_e( 'Toutes les dates', 'hpk-panneaupocket' ); ?></button>
 			<?php foreach ( $dates as $date => $label ) : ?>
@@ -37,9 +40,17 @@ foreach ( $events as $event ) {
 		</div>
 	<?php endif; ?>
 
-	<div class="hpk-pp-agenda hpk-pp-agenda--<?php echo esc_attr( $layout ); ?>">
-		<?php foreach ( $events as $event ) : ?>
-			<article class="hpk-pp-agenda__item" data-date="<?php echo esc_attr( $event['date'] ); ?>">
+	<?php if ( $is_slider ) : ?>
+		<div class="hpk-pp-slider" data-autoplay="<?php echo esc_attr( (string) $autoplay ); ?>">
+			<?php if ( count( $events ) > 1 ) : ?>
+				<button type="button" class="hpk-pp-slider__nav hpk-pp-slider__nav--prev" aria-label="<?php esc_attr_e( 'Événement précédent', 'hpk-panneaupocket' ); ?>"><span aria-hidden="true">‹</span></button>
+			<?php endif; ?>
+			<div class="hpk-pp-slider__viewport">
+	<?php endif; ?>
+
+	<div class="hpk-pp-agenda hpk-pp-agenda--<?php echo esc_attr( $layout ); ?><?php echo $is_slider ? ' hpk-pp-slider__track' : ''; ?>">
+		<?php foreach ( $events as $index => $event ) : ?>
+			<article class="hpk-pp-agenda__item<?php echo $is_slider ? ' hpk-pp-slider__slide' : ''; ?>" data-date="<?php echo esc_attr( $event['date'] ); ?>">
 				<div class="hpk-pp-agenda__open" role="button" tabindex="0">
 					<?php if ( $show_image && ! empty( $event['image'] ) ) : ?>
 						<span class="hpk-pp-agenda__media">
@@ -76,7 +87,23 @@ foreach ( $events as $event ) {
 			</article>
 		<?php endforeach; ?>
 	</div>
-	<p class="hpk-pp-agenda__none" hidden><?php esc_html_e( 'Aucun événement à cette date.', 'hpk-panneaupocket' ); ?></p>
+
+	<?php if ( $is_slider ) : ?>
+			</div>
+			<?php if ( count( $events ) > 1 ) : ?>
+				<button type="button" class="hpk-pp-slider__nav hpk-pp-slider__nav--next" aria-label="<?php esc_attr_e( 'Événement suivant', 'hpk-panneaupocket' ); ?>"><span aria-hidden="true">›</span></button>
+				<div class="hpk-pp-slider__dots" role="tablist" aria-label="<?php esc_attr_e( 'Événements', 'hpk-panneaupocket' ); ?>">
+					<?php foreach ( $events as $index => $event ) : ?>
+						<button type="button" class="hpk-pp-slider__dot<?php echo 0 === $index ? ' is-active' : ''; ?>" data-index="<?php echo esc_attr( (string) $index ); ?>" role="tab" aria-selected="<?php echo 0 === $index ? 'true' : 'false'; ?>" aria-label="<?php echo esc_attr( $event['title'] ); ?>"></button>
+					<?php endforeach; ?>
+				</div>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( ! $is_slider ) : ?>
+		<p class="hpk-pp-agenda__none" hidden><?php esc_html_e( 'Aucun événement à cette date.', 'hpk-panneaupocket' ); ?></p>
+	<?php endif; ?>
 
 	<div class="hpk-pp-agenda-modal" hidden>
 		<div class="hpk-pp-agenda-modal__backdrop" data-close="1"></div>

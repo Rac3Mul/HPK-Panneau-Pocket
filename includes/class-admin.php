@@ -741,6 +741,7 @@ class HPK_PP_Admin {
 			'[panneaupocket_news layout="compact" show_type="true" excerpt_length="80"]',
 			'[panneaupocket_agenda limit="6" layout="list"]',
 			'[panneaupocket_agenda layout="grid" limit="8" show_image="true"]',
+			'[panneaupocket_agenda_slider]',
 		);
 		?>
 		<div class="wrap hpk-pp-admin">
@@ -766,7 +767,11 @@ class HPK_PP_Admin {
 				<code>[panneaupocket_agenda]</code>
 				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_agenda]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
 			</div>
-			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : limit, layout (list/grid), show_image, show_excerpt, excerpt_length, include_past, city_id. Widget Elementor : « PanneauPocket Agenda ».', 'hpk-panneaupocket' ); ?></p>
+			<div class="hpk-pp-copy-block">
+				<code>[panneaupocket_agenda_slider]</code>
+				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_agenda_slider]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
+			</div>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Liste : limit, layout (list/grid/slider), show_image, show_excerpt, excerpt_length, include_past, city_id. Slider : autoplay, interval (ms). Widget Elementor : « PanneauPocket Agenda ».', 'hpk-panneaupocket' ); ?></p>
 			<?php HPK_PP_Admin_UI::card_close(); ?>
 
 			<?php HPK_PP_Admin_UI::card_open( __( 'Actualités synchronisées', 'hpk-panneaupocket' ) ); ?>

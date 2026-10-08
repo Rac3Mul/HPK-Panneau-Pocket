@@ -56,7 +56,7 @@ class HPK_PP_Elementor_Widget_Agenda extends \Elementor\Widget_Base {
 	 * @return array
 	 */
 	public function get_keywords() {
-		return array( 'panneaupocket', 'agenda', 'événement', 'calendrier' );
+		return array( 'panneaupocket', 'agenda', 'événement', 'calendrier', 'slider' );
 	}
 
 	/**
@@ -77,8 +77,9 @@ class HPK_PP_Elementor_Widget_Agenda extends \Elementor\Widget_Base {
 				'type'    => \Elementor\Controls_Manager::SELECT,
 				'default' => 'list',
 				'options' => array(
-					'list' => __( 'Liste', 'hpk-panneaupocket' ),
-					'grid' => __( 'Grille', 'hpk-panneaupocket' ),
+					'list'   => __( 'Liste', 'hpk-panneaupocket' ),
+					'grid'   => __( 'Grille', 'hpk-panneaupocket' ),
+					'slider' => __( 'Slider', 'hpk-panneaupocket' ),
 				),
 			)
 		);
@@ -143,6 +144,7 @@ class HPK_PP_Elementor_Widget_Agenda extends \Elementor\Widget_Base {
 				'show_image'     => ( 'yes' === $settings['show_image'] ) ? 'true' : 'false',
 				'show_excerpt'   => ( 'yes' === $settings['show_excerpt'] ) ? 'true' : 'false',
 				'excerpt_length' => (string) $settings['excerpt_length'],
+				'autoplay'       => 'slider' === $settings['layout'] ? 'true' : 'false',
 			)
 		);
 	}

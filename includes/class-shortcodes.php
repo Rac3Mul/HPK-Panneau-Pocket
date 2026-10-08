@@ -41,6 +41,7 @@ class HPK_PP_Shortcodes {
 		add_shortcode( 'panneaupocket_widget', array( $this, 'render_widget' ) );
 		add_shortcode( 'panneaupocket_news', array( $this, 'render_news' ) );
 		add_shortcode( 'panneaupocket_agenda', array( $this, 'render_agenda' ) );
+		add_shortcode( 'panneaupocket_agenda_slider', array( $this, 'render_agenda_slider' ) );
 	}
 
 	/**
@@ -221,6 +222,24 @@ class HPK_PP_Shortcodes {
 	}
 
 	/**
+	 * Compact agenda slider for a banner.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function render_agenda_slider( $atts ) {
+		$atts           = is_array( $atts ) ? $atts : array();
+		$atts['layout'] = 'slider';
+		if ( empty( $atts['excerpt_length'] ) ) {
+			$atts['excerpt_length'] = '140';
+		}
+		if ( empty( $atts['limit'] ) ) {
+			$atts['limit'] = '8';
+		}
+		return self::get_agenda_html( $atts );
+	}
+
+	/**
 	 * Agenda HTML from the public PanneauPocket city page.
 	 *
 	 * @param array $atts Attributes.
@@ -236,12 +255,14 @@ class HPK_PP_Shortcodes {
 				'excerpt_length' => '420',
 				'include_past'   => 'false',
 				'city_id'        => '',
+				'autoplay'       => 'true',
+				'interval'       => '6000',
 			),
 			$atts,
 			'panneaupocket_agenda'
 		);
 
-		$layout = in_array( $atts['layout'], array( 'list', 'grid' ), true ) ? $atts['layout'] : 'list';
+		$layout = in_array( $atts['layout'], array( 'list', 'grid', 'slider' ), true ) ? $atts['layout'] : 'list';
 		$events = HPK_PP_Agenda::get_events(
 			array(
 				'city_id'      => $atts['city_id'],
@@ -253,6 +274,12 @@ class HPK_PP_Shortcodes {
 		$show_image     = filter_var( $atts['show_image'], FILTER_VALIDATE_BOOLEAN );
 		$show_excerpt   = filter_var( $atts['show_excerpt'], FILTER_VALIDATE_BOOLEAN );
 		$excerpt_length = max( 40, absint( $atts['excerpt_length'] ) );
+		if ( 'slider' === $layout && $excerpt_length > 180 ) {
+			$excerpt_length = 140;
+		}
+		$autoplay = ( 'slider' === $layout && filter_var( $atts['autoplay'], FILTER_VALIDATE_BOOLEAN ) )
+			? max( 3000, absint( $atts['interval'] ) )
+			: 0;
 
 		wp_enqueue_style( 'hpk-pp-frontend', HPK_PP_URL . 'assets/css/frontend.css', array(), HPK_PP_VERSION );
 		wp_enqueue_script( 'hpk-pp-agenda', HPK_PP_URL . 'assets/js/agenda.js', array(), HPK_PP_VERSION, true );
