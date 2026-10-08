@@ -382,7 +382,7 @@
 	background: #fff;
 	border: 1px solid #e2e8f0;
 	border-radius: 12px;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .hpk-pp-agenda__link {
@@ -398,27 +398,32 @@
 }
 
 .hpk-pp-agenda__media {
-	flex: 0 0 110px;
-	width: 110px;
-	height: 150px;
-	overflow: hidden;
-	border-radius: 8px;
-	background: #f3f5f8;
+	flex: 0 0 140px;
+	width: 140px;
+	overflow: visible;
 }
 
 .hpk-pp-agenda--grid .hpk-pp-agenda__media {
 	flex: none;
 	width: 100%;
-	height: 180px;
 }
 
 .hpk-pp-agenda__media img {
 	display: block;
-	width: 100% !important;
-	height: 100% !important;
-	max-width: none !important;
-	object-fit: cover;
+	width: 140px !important;
+	max-width: 140px !important;
+	height: auto !important;
+	max-height: none !important;
+	object-fit: contain;
 	object-position: center top;
+	position: static !important;
+	margin: 0 !important;
+	border-radius: 8px;
+}
+
+.hpk-pp-agenda--grid .hpk-pp-agenda__media img {
+	width: 100% !important;
+	max-width: 100% !important;
 }
 
 .hpk-pp-agenda__body {
@@ -480,8 +485,6 @@
 	align-items: flex-start;
 	gap: 1rem;
 	width: 100%;
-	height: auto !important;
-	max-height: none !important;
 	margin: 0;
 	padding: 0.875rem;
 	border: 0;
@@ -491,8 +494,8 @@
 	cursor: pointer;
 	font: inherit;
 	line-height: normal;
-	overflow: visible !important;
-	appearance: none;
+	overflow: visible;
+	box-sizing: border-box;
 }
 
 .hpk-pp-agenda--grid .hpk-pp-agenda__open {

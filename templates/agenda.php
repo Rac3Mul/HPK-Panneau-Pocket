@@ -40,7 +40,7 @@ foreach ( $events as $event ) {
 	<div class="hpk-pp-agenda hpk-pp-agenda--<?php echo esc_attr( $layout ); ?>">
 		<?php foreach ( $events as $event ) : ?>
 			<article class="hpk-pp-agenda__item" data-date="<?php echo esc_attr( $event['date'] ); ?>">
-				<button type="button" class="hpk-pp-agenda__open">
+				<div class="hpk-pp-agenda__open" role="button" tabindex="0">
 					<?php if ( $show_image && ! empty( $event['image'] ) ) : ?>
 						<span class="hpk-pp-agenda__media">
 							<img src="<?php echo esc_url( $event['image'] ); ?>" alt="" loading="lazy" />
@@ -58,7 +58,7 @@ foreach ( $events as $event ) {
 						<?php endif; ?>
 						<span class="hpk-pp-agenda__more"><?php esc_html_e( 'Voir le détail', 'hpk-panneaupocket' ); ?></span>
 					</span>
-				</button>
+				</div>
 				<template class="hpk-pp-agenda__source">
 					<div class="hpk-pp-agenda__full">
 						<?php if ( ! empty( $event['image'] ) ) : ?>

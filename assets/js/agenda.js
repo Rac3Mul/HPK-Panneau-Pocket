@@ -54,6 +54,12 @@
 			opener.addEventListener('click', function () {
 				openModal(item);
 			});
+			opener.addEventListener('keydown', function (event) {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault();
+					openModal(item);
+				}
+			});
 		});
 
 		if (modal) {
