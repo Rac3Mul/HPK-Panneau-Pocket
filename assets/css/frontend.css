@@ -446,9 +446,12 @@
 }
 
 .hpk-pp-agenda__excerpt {
-	font-size: 0.9rem;
-	line-height: 1.45;
+	display: block;
+	font-size: 0.95rem;
+	line-height: 1.55;
 	color: var(--hpk-pp-text, #333);
+	white-space: normal;
+	overflow: visible;
 }
 
 .hpk-pp-agenda__empty,

@@ -119,9 +119,9 @@ class HPK_PP_Elementor_Widget_Agenda extends \Elementor\Widget_Base {
 			array(
 				'label'   => __( 'Longueur du texte', 'hpk-panneaupocket' ),
 				'type'    => \Elementor\Controls_Manager::NUMBER,
-				'default' => 140,
-				'min'     => 40,
-				'max'     => 400,
+				'default' => 420,
+				'min'     => 80,
+				'max'     => 800,
 			)
 		);
 

@@ -233,7 +233,7 @@ class HPK_PP_Shortcodes {
 				'layout'         => 'list',
 				'show_image'     => 'true',
 				'show_excerpt'   => 'true',
-				'excerpt_length' => '140',
+				'excerpt_length' => '420',
 				'include_past'   => 'false',
 				'city_id'        => '',
 			),
