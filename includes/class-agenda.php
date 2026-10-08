@@ -65,7 +65,7 @@ class HPK_PP_Agenda {
 			return array();
 		}
 
-		$cache_key = 'hpk_pp_agenda_v3_' . $city_id;
+		$cache_key = 'hpk_pp_agenda_v4_' . $city_id;
 		$events    = get_transient( $cache_key );
 
 		if ( false === $events ) {
@@ -116,8 +116,8 @@ class HPK_PP_Agenda {
 			return $events;
 		}
 
-		set_transient( 'hpk_pp_agenda_v3_' . $city_id, $events, self::CACHE_TTL );
-		update_option( 'hpk_pp_agenda_backup_v3_' . $city_id, $events, false );
+		set_transient( 'hpk_pp_agenda_v4_' . $city_id, $events, self::CACHE_TTL );
+		update_option( 'hpk_pp_agenda_backup_v4_' . $city_id, $events, false );
 
 		return $events;
 	}
@@ -129,7 +129,7 @@ class HPK_PP_Agenda {
 	 * @return array
 	 */
 	private static function get_backup( $city_id ) {
-		$backup = get_option( 'hpk_pp_agenda_backup_v3_' . $city_id, array() );
+		$backup = get_option( 'hpk_pp_agenda_backup_v4_' . $city_id, array() );
 		return is_array( $backup ) ? $backup : array();
 	}
 
@@ -248,7 +248,21 @@ class HPK_PP_Agenda {
 			$html = '';
 			$text = '';
 			if ( $content ) {
+				$skip_title = true;
 				foreach ( $content->childNodes as $child ) {
+					if ( $skip_title ) {
+						if ( XML_TEXT_NODE === $child->nodeType && '' === trim( $child->textContent ) ) {
+							continue;
+						}
+						$label = self::normalize_label( $child->textContent );
+						$same  = function_exists( 'mb_strtolower' )
+							? mb_strtolower( $label ) === mb_strtolower( $title )
+							: strtolower( $label ) === strtolower( $title );
+						$skip_title = false;
+						if ( $same ) {
+							continue;
+						}
+					}
 					$html .= $dom->saveHTML( $child );
 				}
 				$html = preg_replace( '/<a[^>]*>\s*<img[^>]*>\s*<\/a>/i', '', $html );
@@ -291,6 +305,18 @@ class HPK_PP_Agenda {
 		$cut = preg_replace( '/\s+\S*$/u', '', $cut );
 
 		return rtrim( $cut ) . '…';
+	}
+
+	/**
+	 * Collapse whitespace for a title comparison.
+	 *
+	 * @param string $text Text.
+	 * @return string
+	 */
+	private static function normalize_label( $text ) {
+		$text = html_entity_decode( (string) $text, ENT_QUOTES, 'UTF-8' );
+		$text = preg_replace( '/\s+/u', ' ', $text );
+		return trim( $text );
 	}
 
 	/**
