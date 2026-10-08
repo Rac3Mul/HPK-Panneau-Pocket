@@ -254,6 +254,9 @@ class HPK_PP_Shortcodes {
 		$show_excerpt   = filter_var( $atts['show_excerpt'], FILTER_VALIDATE_BOOLEAN );
 		$excerpt_length = max( 40, absint( $atts['excerpt_length'] ) );
 
+		wp_enqueue_style( 'hpk-pp-frontend', HPK_PP_URL . 'assets/css/frontend.css', array(), HPK_PP_VERSION );
+		wp_enqueue_script( 'hpk-pp-agenda', HPK_PP_URL . 'assets/js/agenda.js', array(), HPK_PP_VERSION, true );
+
 		ob_start();
 		include HPK_PP_PATH . 'templates/agenda.php';
 		return ob_get_clean();

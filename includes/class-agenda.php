@@ -65,7 +65,7 @@ class HPK_PP_Agenda {
 			return array();
 		}
 
-		$cache_key = 'hpk_pp_agenda_' . $city_id;
+		$cache_key = 'hpk_pp_agenda_v2_' . $city_id;
 		$events    = get_transient( $cache_key );
 
 		if ( false === $events ) {
@@ -116,8 +116,8 @@ class HPK_PP_Agenda {
 			return $events;
 		}
 
-		set_transient( 'hpk_pp_agenda_' . $city_id, $events, self::CACHE_TTL );
-		update_option( 'hpk_pp_agenda_backup_' . $city_id, $events, false );
+		set_transient( 'hpk_pp_agenda_v2_' . $city_id, $events, self::CACHE_TTL );
+		update_option( 'hpk_pp_agenda_backup_v2_' . $city_id, $events, false );
 
 		return $events;
 	}
@@ -129,7 +129,7 @@ class HPK_PP_Agenda {
 	 * @return array
 	 */
 	private static function get_backup( $city_id ) {
-		$backup = get_option( 'hpk_pp_agenda_backup_' . $city_id, array() );
+		$backup = get_option( 'hpk_pp_agenda_backup_v2_' . $city_id, array() );
 		return is_array( $backup ) ? $backup : array();
 	}
 
@@ -245,7 +245,17 @@ class HPK_PP_Agenda {
 				}
 			}
 
-			$text = $content ? trim( preg_replace( '/\s+/u', ' ', $content->textContent ) ) : '';
+			$html = '';
+			$text = '';
+			if ( $content ) {
+				foreach ( $content->childNodes as $child ) {
+					$html .= $dom->saveHTML( $child );
+				}
+				$html = preg_replace( '/<a[^>]*>\s*<img[^>]*>\s*<\/a>/i', '', $html );
+				$html = preg_replace( '/<img[^>]*>/i', '', $html );
+				$html = wp_kses_post( $html );
+				$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $html ) ) );
+			}
 
 			$events[] = array(
 				'id'         => $id,
@@ -253,6 +263,7 @@ class HPK_PP_Agenda {
 				'date'       => $date,
 				'date_label' => $date_label,
 				'excerpt'    => $text,
+				'html'       => $html,
 				'image'      => $image,
 				'url'        => $id ? add_query_arg( 'panneau', $id, $ville_url ) : $ville_url,
 			);
