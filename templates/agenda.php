@@ -43,7 +43,7 @@ foreach ( $events as $event ) {
 	<?php if ( $is_slider ) : ?>
 		<div class="hpk-pp-slider" data-autoplay="<?php echo esc_attr( (string) $autoplay ); ?>">
 			<?php if ( count( $events ) > 1 ) : ?>
-				<button type="button" class="hpk-pp-slider__nav hpk-pp-slider__nav--prev" aria-label="<?php esc_attr_e( 'Événement précédent', 'hpk-panneaupocket' ); ?>"><span aria-hidden="true">‹</span></button>
+				<button type="button" class="hpk-pp-slider__nav hpk-pp-slider__nav--prev" aria-label="<?php esc_attr_e( 'Événement précédent', 'hpk-panneaupocket' ); ?>"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 5.5 L7.5 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 			<?php endif; ?>
 			<div class="hpk-pp-slider__viewport">
 	<?php endif; ?>
@@ -91,7 +91,7 @@ foreach ( $events as $event ) {
 	<?php if ( $is_slider ) : ?>
 			</div>
 			<?php if ( count( $events ) > 1 ) : ?>
-				<button type="button" class="hpk-pp-slider__nav hpk-pp-slider__nav--next" aria-label="<?php esc_attr_e( 'Événement suivant', 'hpk-panneaupocket' ); ?>"><span aria-hidden="true">›</span></button>
+				<button type="button" class="hpk-pp-slider__nav hpk-pp-slider__nav--next" aria-label="<?php esc_attr_e( 'Événement suivant', 'hpk-panneaupocket' ); ?>"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 5.5 L16.5 12 L9.5 18.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 				<div class="hpk-pp-slider__dots" role="tablist" aria-label="<?php esc_attr_e( 'Événements', 'hpk-panneaupocket' ); ?>">
 					<?php foreach ( $events as $index => $event ) : ?>
 						<button type="button" class="hpk-pp-slider__dot<?php echo 0 === $index ? ' is-active' : ''; ?>" data-index="<?php echo esc_attr( (string) $index ); ?>" role="tab" aria-selected="<?php echo 0 === $index ? 'true' : 'false'; ?>" aria-label="<?php echo esc_attr( $event['title'] ); ?>"></button>
