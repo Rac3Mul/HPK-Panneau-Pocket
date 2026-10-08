@@ -450,7 +450,7 @@
 	font-size: 0.95rem;
 	line-height: 1.55;
 	color: var(--hpk-pp-text, #333);
-	white-space: normal;
+	white-space: pre-line;
 	overflow: visible;
 }
 

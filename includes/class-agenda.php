@@ -65,7 +65,7 @@ class HPK_PP_Agenda {
 			return array();
 		}
 
-		$cache_key = 'hpk_pp_agenda_v2_' . $city_id;
+		$cache_key = 'hpk_pp_agenda_v3_' . $city_id;
 		$events    = get_transient( $cache_key );
 
 		if ( false === $events ) {
@@ -116,8 +116,8 @@ class HPK_PP_Agenda {
 			return $events;
 		}
 
-		set_transient( 'hpk_pp_agenda_v2_' . $city_id, $events, self::CACHE_TTL );
-		update_option( 'hpk_pp_agenda_backup_v2_' . $city_id, $events, false );
+		set_transient( 'hpk_pp_agenda_v3_' . $city_id, $events, self::CACHE_TTL );
+		update_option( 'hpk_pp_agenda_backup_v3_' . $city_id, $events, false );
 
 		return $events;
 	}
@@ -129,7 +129,7 @@ class HPK_PP_Agenda {
 	 * @return array
 	 */
 	private static function get_backup( $city_id ) {
-		$backup = get_option( 'hpk_pp_agenda_backup_v2_' . $city_id, array() );
+		$backup = get_option( 'hpk_pp_agenda_backup_v3_' . $city_id, array() );
 		return is_array( $backup ) ? $backup : array();
 	}
 
@@ -254,7 +254,7 @@ class HPK_PP_Agenda {
 				$html = preg_replace( '/<a[^>]*>\s*<img[^>]*>\s*<\/a>/i', '', $html );
 				$html = preg_replace( '/<img[^>]*>/i', '', $html );
 				$html = wp_kses_post( $html );
-				$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $html ) ) );
+				$text = self::html_to_text( $html );
 			}
 
 			$events[] = array(
@@ -270,6 +270,45 @@ class HPK_PP_Agenda {
 		}
 
 		return $events;
+	}
+
+	/**
+	 * Shorten text without removing line breaks.
+	 *
+	 * @param string $text Text.
+	 * @param int    $length Max characters.
+	 * @return string
+	 */
+	public static function trim_text( $text, $length ) {
+		$text   = (string) $text;
+		$length = absint( $length );
+		$len    = function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
+		if ( $length < 1 || $len <= $length ) {
+			return $text;
+		}
+
+		$cut = function_exists( 'mb_substr' ) ? mb_substr( $text, 0, $length ) : substr( $text, 0, $length );
+		$cut = preg_replace( '/\s+\S*$/u', '', $cut );
+
+		return rtrim( $cut ) . '…';
+	}
+
+	/**
+	 * Plain text that keeps paragraph breaks.
+	 *
+	 * @param string $html HTML content.
+	 * @return string
+	 */
+	private static function html_to_text( $html ) {
+		$html = preg_replace( '/<br\s*\/?>/i', "\n", $html );
+		$html = preg_replace( '/<\/(p|div|li|h[1-6]|tr)\s*>/i', "\n", $html );
+		$text = wp_strip_all_tags( $html );
+		$text = html_entity_decode( $text, ENT_QUOTES, 'UTF-8' );
+		$text = preg_replace( "/[ \t]+/u", ' ', $text );
+		$text = preg_replace( "/ *\n */u", "\n", $text );
+		$text = preg_replace( "/\n{3,}/u", "\n\n", $text );
+
+		return trim( $text );
 	}
 
 	/**

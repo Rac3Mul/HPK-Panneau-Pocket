@@ -54,7 +54,7 @@ foreach ( $events as $event ) {
 						<?php endif; ?>
 						<span class="hpk-pp-agenda__title"><?php echo esc_html( $event['title'] ); ?></span>
 						<?php if ( $show_excerpt && ! empty( $event['excerpt'] ) ) : ?>
-							<span class="hpk-pp-agenda__excerpt"><?php echo esc_html( wp_html_excerpt( $event['excerpt'], $excerpt_length, '…' ) ); ?></span>
+							<span class="hpk-pp-agenda__excerpt"><?php echo esc_html( HPK_PP_Agenda::trim_text( $event['excerpt'], $excerpt_length ) ); ?></span>
 						<?php endif; ?>
 						<span class="hpk-pp-agenda__more"><?php esc_html_e( 'Voir le détail', 'hpk-panneaupocket' ); ?></span>
 					</span>
