@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.16
+Stable tag: 1.3.17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.3.17 =
+* Actualités : cartes alignées sur le carrousel du thème (image arrondie, date jaune, lien Plus de détails)
 
 = 1.3.16 =
 * Actualités PanneauPocket : carrousel [panneaupocket_actus] et widget Elementor, sans recopier les articles WordPress
