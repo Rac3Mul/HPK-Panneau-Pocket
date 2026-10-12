@@ -65,7 +65,7 @@ class HPK_PP_Agenda {
 			return array();
 		}
 
-		$cache_key = 'hpk_pp_agenda_v4_' . $city_id;
+		$cache_key = 'hpk_pp_agenda_v5_' . $city_id;
 		$events    = get_transient( $cache_key );
 
 		if ( false === $events ) {
@@ -124,7 +124,7 @@ class HPK_PP_Agenda {
 			return array();
 		}
 
-		$cache_key = 'hpk_pp_news_v1_' . $city_id;
+		$cache_key = 'hpk_pp_news_v2_' . $city_id;
 		$news      = get_transient( $cache_key );
 
 		if ( false === $news ) {
@@ -275,15 +275,107 @@ class HPK_PP_Agenda {
 			return $page;
 		}
 
-		$events = self::parse_signs( $page['html'], $page['url'], 'event' );
-		$news   = self::parse_signs( $page['html'], $page['url'], 'news' );
+		$events = self::shrink_images( self::parse_signs( $page['html'], $page['url'], 'event' ), 6 );
+		$news   = self::shrink_images( self::parse_signs( $page['html'], $page['url'], 'news' ), 12 );
 
-		set_transient( 'hpk_pp_agenda_v4_' . $city_id, $events, self::CACHE_TTL );
-		update_option( 'hpk_pp_agenda_backup_v4_' . $city_id, $events, false );
-		set_transient( 'hpk_pp_news_v1_' . $city_id, $news, self::CACHE_TTL );
-		update_option( 'hpk_pp_news_backup_v1_' . $city_id, $news, false );
+		set_transient( 'hpk_pp_agenda_v5_' . $city_id, $events, self::CACHE_TTL );
+		update_option( 'hpk_pp_agenda_backup_v5_' . $city_id, $events, false );
+		set_transient( 'hpk_pp_news_v2_' . $city_id, $news, self::CACHE_TTL );
+		update_option( 'hpk_pp_news_backup_v2_' . $city_id, $news, false );
 
 		return $events;
+	}
+
+	/**
+	 * Copy remote posters into a small local JPEG.
+	 *
+	 * PanneauPocket serves full-size files from S3 with no cache lifetime.
+	 *
+	 * @param array $items News or events.
+	 * @param int   $limit How many posters to copy on this run.
+	 * @return array
+	 */
+	private static function shrink_images( $items, $limit ) {
+		$done  = 0;
+		$start = microtime( true );
+		foreach ( $items as $index => $item ) {
+			if ( $done >= $limit || ( microtime( true ) - $start ) > 12 ) {
+				break;
+			}
+			if ( empty( $item['image'] ) || false === strpos( $item['image'], 'panneau-pocket' ) ) {
+				continue;
+			}
+			$local = self::localize_image( $item['image'] );
+			if ( $local !== $item['image'] ) {
+				$items[ $index ]['image'] = $local;
+				$done++;
+			}
+		}
+		return $items;
+	}
+
+	/**
+	 * Download one poster and store a 960px JPEG on this site.
+	 *
+	 * @param string $url Remote image.
+	 * @return string
+	 */
+	private static function localize_image( $url ) {
+		$url = esc_url_raw( (string) $url );
+		if ( '' === $url || 0 !== strpos( $url, 'https://' ) ) {
+			return $url;
+		}
+
+		$upload = wp_upload_dir();
+		if ( ! empty( $upload['error'] ) ) {
+			return $url;
+		}
+
+		$dir  = trailingslashit( $upload['basedir'] ) . 'hpk-pp';
+		$base = trailingslashit( $upload['baseurl'] ) . 'hpk-pp';
+		if ( ! wp_mkdir_p( $dir ) ) {
+			return $url;
+		}
+
+		$rules = $dir . '/.htaccess';
+		if ( ! file_exists( $rules ) ) {
+			file_put_contents( $rules, "<IfModule mod_headers.c>\nHeader set Cache-Control \"public, max-age=31536000\"\n</IfModule>\n" );
+		}
+
+		$name   = md5( $url ) . '.jpg';
+		$path   = $dir . '/' . $name;
+		$public = $base . '/' . $name;
+		if ( file_exists( $path ) && filesize( $path ) > 800 ) {
+			return $public;
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$tmp = download_url( $url, 20 );
+		if ( is_wp_error( $tmp ) ) {
+			return $url;
+		}
+
+		$editor = wp_get_image_editor( $tmp );
+		if ( is_wp_error( $editor ) ) {
+			wp_delete_file( $tmp );
+			return $url;
+		}
+
+		$size = $editor->get_size();
+		if ( ! empty( $size['width'] ) && (int) $size['width'] > 960 ) {
+			$editor->resize( 960, null, false );
+		}
+		$editor->set_quality( 72 );
+		$saved = $editor->save( $path, 'image/jpeg' );
+		wp_delete_file( $tmp );
+
+		if ( is_wp_error( $saved ) || empty( $saved['path'] ) ) {
+			return $url;
+		}
+
+		return $public;
 	}
 
 	/**
@@ -293,7 +385,7 @@ class HPK_PP_Agenda {
 	 * @return array
 	 */
 	private static function get_backup( $city_id ) {
-		$backup = get_option( 'hpk_pp_agenda_backup_v4_' . $city_id, array() );
+		$backup = get_option( 'hpk_pp_agenda_backup_v5_' . $city_id, array() );
 		return is_array( $backup ) ? $backup : array();
 	}
 
@@ -304,7 +396,7 @@ class HPK_PP_Agenda {
 	 * @return array
 	 */
 	private static function get_news_backup( $city_id ) {
-		$backup = get_option( 'hpk_pp_news_backup_v1_' . $city_id, array() );
+		$backup = get_option( 'hpk_pp_news_backup_v2_' . $city_id, array() );
 		return is_array( $backup ) ? $backup : array();
 	}
 

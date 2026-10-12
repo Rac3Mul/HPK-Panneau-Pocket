@@ -18,11 +18,22 @@
 			return Math.max(0, slides.length - perView());
 		}
 
+		function reveal() {
+			var from = Math.max(0, index - 1);
+			var to = Math.min(slides.length, index + perView() + 1);
+			for (var i = from; i < to; i++) {
+				var img = slides[i].querySelector('img[data-src]');
+				if (!img || img.getAttribute('src')) continue;
+				img.src = img.getAttribute('data-src');
+			}
+		}
+
 		function go(next) {
 			var max = maxIndex();
 			index = Math.max(0, Math.min(max, next));
 			var width = slides[0] ? slides[0].getBoundingClientRect().width : 0;
 			if (track) track.style.transform = 'translateX(' + (-index * width) + 'px)';
+			reveal();
 			if (dots) {
 				dots.querySelectorAll('button').forEach(function (dot, n) {
 					var on = n === index;

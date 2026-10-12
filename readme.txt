@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.22
+Stable tag: 1.3.23
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.3.23 =
+* Actualités : les affiches PanneauPocket sont réduites et servies par le site, le carrousel ne charge que les cartes visibles
 
 = 1.3.22 =
 * Chargement : l'iframe PanneauPocket ne se charge qu'à l'ouverture, polices Google non bloquantes, CSS agenda retiré hors pages événements

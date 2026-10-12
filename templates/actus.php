@@ -23,12 +23,14 @@ $interval = isset( $interval ) ? absint( $interval ) : 3000;
 <div class="hpk-pp-actus" data-autoplay="<?php echo esc_attr( (string) $interval ); ?>">
 	<div class="hpk-pp-actus__viewport">
 		<div class="hpk-pp-actus__track">
+			<?php $hpk_pp_slide = 0; ?>
 			<?php foreach ( $news as $item ) : ?>
+				<?php $hpk_pp_slide++; ?>
 				<article class="hpk-pp-actus__slide">
 					<a class="hpk-pp-actus__card" href="<?php echo esc_url( HPK_PP_Agenda::news_url( $item['id'] ) ); ?>">
 						<div class="hpk-pp-actus__media">
 							<?php if ( ! empty( $item['image'] ) ) : ?>
-								<img src="<?php echo esc_url( $item['image'] ); ?>" alt="" loading="lazy" draggable="false" />
+								<img <?php echo $hpk_pp_slide <= 3 ? 'src' : 'data-src'; ?>="<?php echo esc_url( $item['image'] ); ?>" alt="" decoding="async" draggable="false" <?php echo $hpk_pp_slide <= 3 ? 'fetchpriority="low"' : ''; ?> />
 							<?php endif; ?>
 						</div>
 						<div class="hpk-pp-actus__body">
