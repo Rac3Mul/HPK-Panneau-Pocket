@@ -42,6 +42,7 @@ class HPK_PP_Shortcodes {
 		add_shortcode( 'panneaupocket_news', array( $this, 'render_news' ) );
 		add_shortcode( 'panneaupocket_agenda', array( $this, 'render_agenda' ) );
 		add_shortcode( 'panneaupocket_agenda_slider', array( $this, 'render_agenda_slider' ) );
+		add_shortcode( 'panneaupocket_actus', array( $this, 'render_actus' ) );
 	}
 
 	/**
@@ -237,6 +238,41 @@ class HPK_PP_Shortcodes {
 			$atts['limit'] = '8';
 		}
 		return self::get_agenda_html( $atts );
+	}
+
+	/**
+	 * News carousel from the public PanneauPocket city page.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function render_actus( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'limit'       => '8',
+				'button_text' => __( 'Plus de détails', 'hpk-panneaupocket' ),
+				'interval'    => '3000',
+				'city_id'     => '',
+			),
+			$atts,
+			'panneaupocket_actus'
+		);
+
+		$news        = HPK_PP_Agenda::get_news(
+			array(
+				'city_id' => $atts['city_id'],
+				'limit'   => absint( $atts['limit'] ),
+			)
+		);
+		$button_text = $atts['button_text'] ? $atts['button_text'] : __( 'Plus de détails', 'hpk-panneaupocket' );
+		$interval    = max( 0, absint( $atts['interval'] ) );
+
+		wp_enqueue_style( 'hpk-pp-frontend', HPK_PP_URL . 'assets/css/frontend.css', array(), HPK_PP_VERSION );
+		wp_enqueue_script( 'hpk-pp-actus', HPK_PP_URL . 'assets/js/actus.js', array(), HPK_PP_VERSION, true );
+
+		ob_start();
+		include HPK_PP_PATH . 'templates/actus.php';
+		return ob_get_clean();
 	}
 
 	/**

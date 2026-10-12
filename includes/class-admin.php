@@ -742,6 +742,7 @@ class HPK_PP_Admin {
 			'[panneaupocket_agenda limit="6" layout="list"]',
 			'[panneaupocket_agenda layout="grid" limit="8" show_image="true"]',
 			'[panneaupocket_agenda_slider]',
+			'[panneaupocket_actus]',
 		);
 		?>
 		<div class="wrap hpk-pp-admin">
@@ -772,6 +773,15 @@ class HPK_PP_Admin {
 				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_agenda_slider]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
 			</div>
 			<p class="hpk-pp-field__help"><?php esc_html_e( 'Liste : limit, layout (list/grid/slider), show_image, show_excerpt, excerpt_length, include_past, city_id. Slider : autoplay, interval (ms). Widget Elementor : « PanneauPocket Agenda ».', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
+
+			<?php HPK_PP_Admin_UI::card_open( __( 'Actualités PanneauPocket', 'hpk-panneaupocket' ) ); ?>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Carrousel des infos publiées sur PanneauPocket (hors événements et alertes). Le détail s\'ouvre sur le site, sans article WordPress.', 'hpk-panneaupocket' ); ?></p>
+			<div class="hpk-pp-copy-block">
+				<code>[panneaupocket_actus]</code>
+				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_actus]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
+			</div>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : limit, button_text, interval, city_id. Widget Elementor : « PanneauPocket Actualités ». 3 cartes sur ordinateur, 2 sur tablette, 1 sur mobile.', 'hpk-panneaupocket' ); ?></p>
 			<?php HPK_PP_Admin_UI::card_close(); ?>
 
 			<?php HPK_PP_Admin_UI::card_open( __( 'Actualités synchronisées', 'hpk-panneaupocket' ) ); ?>

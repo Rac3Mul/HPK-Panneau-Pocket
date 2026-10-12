@@ -105,19 +105,71 @@ class HPK_PP_Agenda {
 	}
 
 	/**
+	 * Info signs (not events, not alerts), newest first.
+	 *
+	 * @param array $args Display args.
+	 * @return array
+	 */
+	public static function get_news( $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'city_id' => '',
+				'limit'   => 8,
+			)
+		);
+
+		$city_id = trim( (string) ( $args['city_id'] ? $args['city_id'] : get_option( 'hpk_pp_city_id', '' ) ) );
+		if ( '' === $city_id ) {
+			return array();
+		}
+
+		$cache_key = 'hpk_pp_news_v1_' . $city_id;
+		$news      = get_transient( $cache_key );
+
+		if ( false === $news ) {
+			$fetched = self::fetch_and_store( $city_id );
+			$news    = is_wp_error( $fetched ) ? self::get_news_backup( $city_id ) : get_transient( $cache_key );
+		}
+
+		if ( ! is_array( $news ) ) {
+			return array();
+		}
+
+		usort(
+			$news,
+			static function ( $a, $b ) {
+				return strcmp( (string) ( $b['date'] ?? '0000-00-00' ), (string) ( $a['date'] ?? '0000-00-00' ) );
+			}
+		);
+
+		$limit = absint( $args['limit'] );
+		if ( $limit > 0 ) {
+			$news = array_slice( $news, 0, $limit );
+		}
+
+		return $news;
+	}
+
+	/**
 	 * Fetch the public city page and store events.
 	 *
 	 * @param string $city_id City ID.
 	 * @return array|WP_Error
 	 */
 	public static function fetch_and_store( $city_id ) {
-		$events = self::fetch_events( $city_id );
-		if ( is_wp_error( $events ) ) {
-			return $events;
+		$page = self::download_city( $city_id );
+		if ( is_wp_error( $page ) ) {
+			return $page;
 		}
+
+		$events = self::parse_signs( $page['html'], $page['url'], 'event' );
+		$news   = self::parse_signs( $page['html'], $page['url'], 'news' );
 
 		set_transient( 'hpk_pp_agenda_v4_' . $city_id, $events, self::CACHE_TTL );
 		update_option( 'hpk_pp_agenda_backup_v4_' . $city_id, $events, false );
+		set_transient( 'hpk_pp_news_v1_' . $city_id, $news, self::CACHE_TTL );
+		update_option( 'hpk_pp_news_backup_v1_' . $city_id, $news, false );
 
 		return $events;
 	}
@@ -134,12 +186,38 @@ class HPK_PP_Agenda {
 	}
 
 	/**
+	 * Last successful news snapshot.
+	 *
+	 * @param string $city_id City ID.
+	 * @return array
+	 */
+	private static function get_news_backup( $city_id ) {
+		$backup = get_option( 'hpk_pp_news_backup_v1_' . $city_id, array() );
+		return is_array( $backup ) ? $backup : array();
+	}
+
+	/**
 	 * Download and parse events.
 	 *
 	 * @param string $city_id City ID.
 	 * @return array|WP_Error
 	 */
 	public static function fetch_events( $city_id ) {
+		$page = self::download_city( $city_id );
+		if ( is_wp_error( $page ) ) {
+			return $page;
+		}
+
+		return self::parse_signs( $page['html'], $page['url'], 'event' );
+	}
+
+	/**
+	 * Download the public city page.
+	 *
+	 * @param string $city_id City ID.
+	 * @return array|WP_Error html and url.
+	 */
+	private static function download_city( $city_id ) {
 		$city_id = preg_replace( '/\D+/', '', (string) $city_id );
 		if ( '' === $city_id ) {
 			return new WP_Error( 'hpk_pp_no_city', __( 'City ID manquant.', 'hpk-panneaupocket' ) );
@@ -183,7 +261,10 @@ class HPK_PP_Agenda {
 			return new WP_Error( 'hpk_pp_empty', __( 'Réponse vide de PanneauPocket.', 'hpk-panneaupocket' ) );
 		}
 
-		return self::parse_events( $html, $ville_url );
+		return array(
+			'html' => $html,
+			'url'  => $ville_url,
+		);
 	}
 
 	/**
@@ -194,6 +275,18 @@ class HPK_PP_Agenda {
 	 * @return array
 	 */
 	public static function parse_events( $html, $ville_url ) {
+		return self::parse_signs( $html, $ville_url, 'event' );
+	}
+
+	/**
+	 * Extract signs from the city HTML.
+	 *
+	 * @param string $html HTML.
+	 * @param string $ville_url City page URL.
+	 * @param string $kind event, news or all.
+	 * @return array
+	 */
+	public static function parse_signs( $html, $ville_url, $kind = 'all' ) {
 		$events = array();
 
 		if ( ! class_exists( 'DOMDocument' ) ) {
@@ -214,7 +307,17 @@ class HPK_PP_Agenda {
 
 		foreach ( $items as $item ) {
 			$preview = $xpath->query( './/div[contains(@class,"sign-preview")]', $item )->item( 0 );
-			if ( ! $preview || false === strpos( $preview->getAttribute( 'class' ), 'sign-preview--event' ) ) {
+			if ( ! $preview ) {
+				continue;
+			}
+
+			$class    = $preview->getAttribute( 'class' );
+			$is_event = false !== strpos( $class, 'sign-preview--event' );
+			$is_alert = false !== strpos( $class, 'sign-preview--alert' );
+			if ( 'event' === $kind && ! $is_event ) {
+				continue;
+			}
+			if ( 'news' === $kind && ( $is_event || $is_alert ) ) {
 				continue;
 			}
 
@@ -229,6 +332,7 @@ class HPK_PP_Agenda {
 
 			$date_label = $date_node ? trim( preg_replace( '/\s+/u', ' ', $date_node->textContent ) ) : '';
 			$date       = self::parse_date( $date_label );
+			$date_parts = self::date_parts( $date );
 
 			$id = '';
 			if ( preg_match( '/panneau=(\d+)/', $dom->saveHTML( $item ), $id_match ) ) {
@@ -275,6 +379,8 @@ class HPK_PP_Agenda {
 				'id'         => $id,
 				'title'      => $title,
 				'date'       => $date,
+				'day'        => $date_parts['day'],
+				'month'      => $date_parts['month'],
 				'date_label' => $date_label,
 				'excerpt'    => $text,
 				'html'       => $html,
@@ -348,5 +454,32 @@ class HPK_PP_Agenda {
 			return $m[3] . '-' . $m[2] . '-' . $m[1];
 		}
 		return '';
+	}
+
+	/**
+	 * Day and month label for a Y-m-d date.
+	 *
+	 * @param string $date Y-m-d.
+	 * @return array{day:string,month:string}
+	 */
+	private static function date_parts( $date ) {
+		$empty = array(
+			'day'   => '',
+			'month' => '',
+		);
+		if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', (string) $date, $m ) ) {
+			return $empty;
+		}
+
+		$names = array( 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc' );
+		$index = (int) $m[2] - 1;
+		if ( ! isset( $names[ $index ] ) ) {
+			return $empty;
+		}
+
+		return array(
+			'day'   => (string) (int) $m[3],
+			'month' => $names[ $index ] . ', ' . $m[1],
+		);
 	}
 }

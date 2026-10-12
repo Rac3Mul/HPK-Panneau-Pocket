@@ -65,9 +65,11 @@ class HPK_PP_Elementor {
 		require_once HPK_PP_PATH . 'includes/elementor/widget-iframe.php';
 		require_once HPK_PP_PATH . 'includes/elementor/widget-news.php';
 		require_once HPK_PP_PATH . 'includes/elementor/widget-agenda.php';
+		require_once HPK_PP_PATH . 'includes/elementor/widget-actus.php';
 
 		$widgets_manager->register( new HPK_PP_Elementor_Widget_Iframe() );
 		$widgets_manager->register( new HPK_PP_Elementor_Widget_News() );
 		$widgets_manager->register( new HPK_PP_Elementor_Widget_Agenda() );
+		$widgets_manager->register( new HPK_PP_Elementor_Widget_Actus() );
 	}
 }
