@@ -152,6 +152,63 @@ class HPK_PP_Agenda {
 	}
 
 	/**
+	 * One news item by public id.
+	 *
+	 * @param string $id Panneau id.
+	 * @return array|null
+	 */
+	public static function find_news( $id ) {
+		$id = preg_replace( '/\D+/', '', (string) $id );
+		if ( '' === $id ) {
+			return null;
+		}
+		foreach ( self::get_news( array( 'limit' => 60 ) ) as $item ) {
+			if ( (string) ( $item['id'] ?? '' ) === $id ) {
+				return $item;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Archive URL.
+	 *
+	 * @return string
+	 */
+	public static function archive_url() {
+		return home_url( user_trailingslashit( 'a-la-une' ) );
+	}
+
+	/**
+	 * Single news URL.
+	 *
+	 * @param string $id Panneau id.
+	 * @return string
+	 */
+	public static function news_url( $id ) {
+		$id = preg_replace( '/\D+/', '', (string) $id );
+		return home_url( user_trailingslashit( 'a-la-une/' . $id ) );
+	}
+
+	/**
+	 * French long date from Y-m-d.
+	 *
+	 * @param string $date Y-m-d.
+	 * @return string
+	 */
+	public static function format_long_date( $date ) {
+		if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', (string) $date, $m ) ) {
+			return '';
+		}
+		$names = array( 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre' );
+		$index = (int) $m[2] - 1;
+		if ( ! isset( $names[ $index ] ) ) {
+			return '';
+		}
+		return (int) $m[3] . ' ' . $names[ $index ] . ' ' . $m[1];
+	}
+
+	/**
 	 * Fetch the public city page and store events.
 	 *
 	 * @param string $city_id City ID.
@@ -338,7 +395,10 @@ class HPK_PP_Agenda {
 			if ( preg_match( '/panneau=(\d+)/', $dom->saveHTML( $item ), $id_match ) ) {
 				$id = $id_match[1];
 			} elseif ( $item->hasAttribute( 'data-id' ) ) {
-				$id = $item->getAttribute( 'data-id' );
+				$id = preg_replace( '/\D+/', '', $item->getAttribute( 'data-id' ) );
+			}
+			if ( '' === $id ) {
+				$id = (string) sprintf( '%u', crc32( $title . '|' . $date ) );
 			}
 
 			$image = '';
