@@ -18,27 +18,80 @@ if ( ! defined( 'ABSPATH' ) ) {
 $more_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M10.0035 3.4083L1.41176 12L0 10.5882L8.59171 1.99654H1.01905V0H12V10.981H10.0035V3.4083Z" fill="currentColor"/></svg>';
 $single    = ! empty( $item );
 ?>
-<?php if ( $single ) : ?>
-<script>
+<div class="hpk-pp-une<?php echo $single ? ' hpk-pp-une--single' : ''; ?>">
+<script data-cfasync="false">
 (function () {
-	var root = document.currentScript && document.currentScript.nextElementSibling;
-	if (!root) return;
-	var banner = document.getElementById('pxl-page-title');
-	if (banner) banner.classList.add('hpk-pp-une-skip');
-	var main = document.getElementById('pxl-main') || document.body;
-	var node = root;
-	while (node && node !== main) {
-		var sib = node.previousElementSibling;
-		while (sib) {
-			sib.classList.add('hpk-pp-une-skip');
-			sib = sib.previousElementSibling;
-		}
-		node = node.parentElement;
+	var root = document.currentScript && document.currentScript.parentElement;
+	if (!root || !root.classList.contains('hpk-pp-une')) {
+		root = document.querySelector('.hpk-pp-une--single, .hpk-pp-une');
 	}
+	if (!root) return;
+
+	function hide(el) {
+		if (!el || el.nodeType !== 1) return;
+		if (el.closest('header, footer, #pxl-header-elementor, #pxl-footer, .pxl-header, .pxl-header-sticky')) return;
+		el.classList.add('hpk-pp-une-skip');
+		el.style.setProperty('display', 'none', 'important');
+		el.style.setProperty('height', '0', 'important');
+		el.style.setProperty('min-height', '0', 'important');
+		el.style.setProperty('margin', '0', 'important');
+		el.style.setProperty('padding', '0', 'important');
+		el.style.setProperty('overflow', 'hidden', 'important');
+		el.style.setProperty('visibility', 'hidden', 'important');
+	}
+
+	if (root.classList.contains('hpk-pp-une--single')) {
+		var banner = document.getElementById('pxl-page-title');
+		if (banner) hide(banner);
+		var main = document.getElementById('pxl-main') || document.body;
+		var node = root;
+		while (node && node !== main && node !== document.body) {
+			var sib = node.previousElementSibling;
+			while (sib) {
+				var prev = sib.previousElementSibling;
+				hide(sib);
+				sib = prev;
+			}
+			node = node.parentElement;
+		}
+	}
+
+	var clip = root.parentElement;
+	var stop = document.getElementById('pxl-main') || document.body;
+	while (clip && clip !== stop && clip !== document.body) {
+		var flow = window.getComputedStyle(clip).overflowY;
+		if (flow === 'hidden' || flow === 'clip' || flow === 'auto' || flow === 'scroll') {
+			clip.style.setProperty('overflow', 'visible', 'important');
+		}
+		clip = clip.parentElement;
+	}
+
+	function stick() {
+		if (window.matchMedia('(max-width: 900px)').matches) {
+			document.documentElement.style.removeProperty('--hpk-pp-sticky-top');
+			return;
+		}
+		var top = 16;
+		var bar = document.querySelector('.pxl-header-sticky');
+		var header = document.getElementById('pxl-header-elementor');
+		var seen = 0;
+		[bar, header].forEach(function (el) {
+			if (!el || seen) return;
+			var pos = window.getComputedStyle(el).position;
+			if (pos !== 'fixed' && pos !== 'sticky') return;
+			var rect = el.getBoundingClientRect();
+			if (rect.bottom > 0 && rect.height > 20) {
+				top = Math.round(rect.height) + 12;
+				seen = 1;
+			}
+		});
+		document.documentElement.style.setProperty('--hpk-pp-sticky-top', top + 'px');
+	}
+	stick();
+	window.addEventListener('scroll', stick, { passive: true });
+	window.addEventListener('resize', stick);
 })();
 </script>
-<?php endif; ?>
-<div class="hpk-pp-une<?php echo $single ? ' hpk-pp-une--single' : ''; ?>">
 	<div class="hpk-pp-une__main">
 		<?php if ( $item ) : ?>
 			<article class="hpk-pp-une__article">
