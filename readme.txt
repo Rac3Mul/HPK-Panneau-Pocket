@@ -4,7 +4,7 @@ Tags: panneaupocket, widget, iframe, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.18
+Stable tag: 1.3.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ Ajoutez dans `wp-config.php` :
 `define( 'HPK_PP_GITHUB_TOKEN', 'votre-token-github' );`
 
 == Changelog ==
+
+= 1.3.19 =
+* À la une : code court [panneaupocket_une] à coller dans votre page (liste, extrait, En savoir plus, recherche)
+* Carrousel d'accueil : zoom au survol, gros points, glisser à la souris ou au doigt
 
 = 1.3.18 =
 * Actualités : « Plus de détails » ouvre la page À la une, avec recherche et news récentes

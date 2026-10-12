@@ -176,7 +176,49 @@ class HPK_PP_Agenda {
 	 * @return string
 	 */
 	public static function archive_url() {
-		return home_url( user_trailingslashit( 'a-la-une' ) );
+		$page_id = (int) get_option( 'hpk_pp_une_page_id' );
+		if ( $page_id < 1 || 'publish' !== get_post_status( $page_id ) ) {
+			$page_id = self::locate_une_page();
+			if ( $page_id > 0 ) {
+				update_option( 'hpk_pp_une_page_id', $page_id, false );
+			}
+		}
+		if ( $page_id > 0 ) {
+			$link = get_permalink( $page_id );
+			if ( $link ) {
+				return $link;
+			}
+		}
+		return home_url( '/' );
+	}
+
+	/**
+	 * Find the published page that contains the À la une shortcode.
+	 *
+	 * @return int
+	 */
+	private static function locate_une_page() {
+		global $wpdb;
+
+		$like = '%panneaupocket_une%';
+		$id   = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status = 'publish' AND post_content LIKE %s ORDER BY ID DESC LIMIT 1",
+				$like
+			)
+		);
+		if ( $id ) {
+			return (int) $id;
+		}
+
+		$id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT pm.post_id FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = '_elementor_data' AND pm.meta_value LIKE %s AND p.post_type = 'page' AND p.post_status = 'publish' LIMIT 1",
+				$like
+			)
+		);
+
+		return $id ? (int) $id : 0;
 	}
 
 	/**
@@ -187,7 +229,7 @@ class HPK_PP_Agenda {
 	 */
 	public static function news_url( $id ) {
 		$id = preg_replace( '/\D+/', '', (string) $id );
-		return home_url( user_trailingslashit( 'a-la-une/' . $id ) );
+		return add_query_arg( 'actu', $id, self::archive_url() );
 	}
 
 	/**

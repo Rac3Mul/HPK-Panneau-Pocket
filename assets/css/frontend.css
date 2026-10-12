@@ -814,6 +814,13 @@ body.hpk-pp-agenda-open {
 
 .hpk-pp-actus__viewport {
 	overflow: hidden;
+	cursor: grab;
+	touch-action: pan-y;
+}
+
+.hpk-pp-actus.is-dragging .hpk-pp-actus__viewport {
+	cursor: grabbing;
+	user-select: none;
 }
 
 .hpk-pp-actus__track {
@@ -860,6 +867,13 @@ body.hpk-pp-agenda-open {
 	object-position: center;
 	margin: 0 !important;
 	border-radius: 0 !important;
+	transform: scale(1);
+	transition: transform 0.5s ease;
+}
+
+.hpk-pp-actus__card:hover .hpk-pp-actus__media img,
+.hpk-pp-actus__card:focus-visible .hpk-pp-actus__media img {
+	transform: scale(1.15) rotate(5deg) !important;
 }
 
 .hpk-pp-actus__body {
@@ -921,6 +935,7 @@ body.hpk-pp-agenda-open {
 	line-height: 1.35;
 	letter-spacing: -0.34px;
 	color: #002749;
+	transition: color 0.25s ease;
 	display: -webkit-box;
 	-webkit-line-clamp: 3;
 	-webkit-box-orient: vertical;
@@ -933,6 +948,7 @@ body.hpk-pp-agenda-open {
 }
 
 .hpk-pp-actus__more {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
@@ -942,6 +958,18 @@ body.hpk-pp-agenda-open {
 	font-size: 16px;
 	line-height: 1.75;
 	background: transparent;
+	text-decoration: none;
+}
+
+.hpk-pp-actus__more::after {
+	content: '';
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: 0;
+	height: 1px;
+	background: currentColor;
+	transition: width 0.25s ease;
 }
 
 .hpk-pp-actus__more svg {
@@ -951,33 +979,54 @@ body.hpk-pp-agenda-open {
 	flex: 0 0 12px;
 }
 
-.hpk-pp-actus__card:hover .hpk-pp-actus__more {
-	text-decoration: underline;
+.hpk-pp-actus__card:hover .hpk-pp-actus__more::after,
+.hpk-pp-actus__card:focus-visible .hpk-pp-actus__more::after {
+	left: 0;
+	right: auto;
+	width: 100%;
 }
 
 .hpk-pp-actus__dots {
 	position: static;
 	display: flex;
+	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	margin: 28px 0 0;
+	gap: 12px;
+	margin: 48px 0 0;
 }
 
 .hpk-pp-actus__dot {
-	width: 9px !important;
-	height: 9px !important;
-	min-height: 0;
+	position: relative;
+	width: 22px !important;
+	height: 22px !important;
+	min-width: 22px !important;
+	min-height: 22px !important;
+	line-height: 0 !important;
 	padding: 0 !important;
-	border: 0 !important;
-	border-radius: 999px;
-	background: rgba(0, 39, 73, 0.25);
+	border: thin solid #529149 !important;
+	border-radius: 50%;
+	background: transparent !important;
+	color: transparent;
 	cursor: pointer;
+	transition: color 0.25s ease;
+}
+
+.hpk-pp-actus__dot::before {
+	content: '';
+	position: absolute;
+	inset: 2px;
+	border-radius: inherit;
+	background: currentColor;
+}
+
+.hpk-pp-actus__dot::after {
+	content: none !important;
 }
 
 .hpk-pp-actus__dot.is-active,
 .hpk-pp-actus__dot:hover,
 .hpk-pp-actus__dot:focus-visible {
-	background: #0268ad;
+	color: #529149;
 	outline: none;
 }
 
@@ -1002,8 +1051,16 @@ body.hpk-pp-agenda-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.hpk-pp-actus__track {
+	.hpk-pp-actus__track,
+	.hpk-pp-actus__media img,
+	.hpk-pp-actus__more::after,
+	.hpk-pp-actus__title {
 		transition: none;
+	}
+
+	.hpk-pp-actus__card:hover .hpk-pp-actus__media img,
+	.hpk-pp-actus__card:focus-visible .hpk-pp-actus__media img {
+		transform: none !important;
 	}
 }
 
@@ -1011,9 +1068,9 @@ body.hpk-pp-agenda-open {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) 320px;
 	gap: 36px;
-	max-width: 1180px;
-	margin: 36px auto 64px;
-	padding: 0 20px;
+	max-width: none;
+	margin: 0;
+	padding: 0;
 	color: #002749;
 }
 
@@ -1054,11 +1111,119 @@ body.hpk-pp-agenda-open {
 	font-weight: 700;
 }
 
+.hpk-pp-une__lead {
+	margin: 0 0 16px;
+	color: #4d5c56;
+	font-size: 18px;
+	line-height: 1.55;
+}
+
 .hpk-pp-une__text p {
 	margin: 0 0 0.9rem;
 	font-size: 17px;
 	line-height: 1.6;
 	color: #243028;
+}
+
+.hpk-pp-une__back {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	margin: 0 0 16px;
+	color: #0268ad;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.hpk-pp-une__back:hover,
+.hpk-pp-une__back:focus-visible {
+	text-decoration: underline;
+}
+
+.hpk-pp-une__list {
+	display: grid;
+	gap: 16px;
+}
+
+.hpk-pp-une__card {
+	display: grid;
+	grid-template-columns: 148px minmax(0, 1fr);
+	gap: 18px;
+	align-items: center;
+	padding: 14px;
+	border: 1px solid #e4ebe6;
+	border-radius: 16px;
+	background: #fff;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hpk-pp-une__card:hover {
+	border-color: #c5ddc0;
+	box-shadow: 0 8px 24px rgba(0, 39, 73, 0.06);
+}
+
+.hpk-pp-une__thumb {
+	display: block;
+	width: 148px;
+	height: 104px;
+	border-radius: 12px;
+	overflow: hidden;
+	background: #e7eef5;
+}
+
+.hpk-pp-une__thumb img {
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+	margin: 0 !important;
+}
+
+.hpk-pp-une__date {
+	margin: 0 0 4px;
+	color: #636d6c;
+	font-size: 13px;
+}
+
+.hpk-pp-une__card-title {
+	margin: 0 0 6px;
+	font-size: 20px;
+	line-height: 1.3;
+	font-weight: 700;
+}
+
+.hpk-pp-une__card-title a {
+	color: #002749;
+	text-decoration: none;
+}
+
+.hpk-pp-une__card:hover .hpk-pp-une__card-title a {
+	color: #0268ad;
+}
+
+.hpk-pp-une__excerpt {
+	margin: 0 0 10px;
+	color: #4d5c56;
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.hpk-pp-une__more {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	color: #0268ad;
+	font-weight: 800;
+	text-decoration: none;
+}
+
+.hpk-pp-une__more svg {
+	width: 12px;
+	height: 12px;
+}
+
+.hpk-pp-une__card:hover .hpk-pp-une__more {
+	text-decoration: underline;
 }
 
 .hpk-pp-une__side {
@@ -1086,6 +1251,10 @@ body.hpk-pp-agenda-open {
 	color: #002749;
 	min-width: 0;
 	padding: 6px 0;
+}
+
+.hpk-pp-une__search:focus-within {
+	box-shadow: 0 0 0 2px #0268ad;
 }
 
 .hpk-pp-une__search input:focus {
@@ -1162,22 +1331,6 @@ body.hpk-pp-agenda-open {
 	line-height: 1.3;
 }
 
-.hpk-pp-une__list {
-	display: grid;
-	gap: 18px;
-}
-
-.hpk-pp-une__result {
-	padding-bottom: 18px;
-	border-bottom: 1px solid #e4ebe6;
-}
-
-.hpk-pp-une__result img {
-	width: 120px !important;
-	height: 84px !important;
-	flex-basis: 120px;
-}
-
 .hpk-pp-une__empty {
 	margin: 0;
 	color: #636d6c;
@@ -1190,5 +1343,14 @@ body.hpk-pp-agenda-open {
 
 	.hpk-pp-une__title {
 		font-size: 28px;
+	}
+
+	.hpk-pp-une__card {
+		grid-template-columns: 112px minmax(0, 1fr);
+	}
+
+	.hpk-pp-une__thumb {
+		width: 112px;
+		height: 84px;
 	}
 }

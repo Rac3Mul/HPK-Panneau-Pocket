@@ -87,16 +87,71 @@
 			});
 		}
 
-		var touchX = 0;
-		root.addEventListener('touchstart', function (event) {
-			touchX = event.changedTouches[0].clientX;
-			stop();
-		}, { passive: true });
-		root.addEventListener('touchend', function (event) {
-			var delta = event.changedTouches[0].clientX - touchX;
-			if (Math.abs(delta) > 40) go(delta < 0 ? index + 1 : index - 1);
-			start();
-		}, { passive: true });
+		var viewport = root.querySelector('.hpk-pp-actus__viewport');
+		var dragging = false;
+		var moved = false;
+		var startX = 0;
+		var startTranslate = 0;
+		var activePointer = null;
+
+		function slideWidth() {
+			return slides[0] ? slides[0].getBoundingClientRect().width : 0;
+		}
+
+		function translateFor(nextIndex) {
+			return -nextIndex * slideWidth();
+		}
+
+		if (viewport) {
+			viewport.addEventListener('pointerdown', function (event) {
+				if (event.button !== 0 || event.target.closest('.hpk-pp-actus__dots')) return;
+				dragging = true;
+				moved = false;
+				startX = event.clientX;
+				startTranslate = translateFor(index);
+				activePointer = event.pointerId;
+				if (track) track.style.transition = 'none';
+				root.classList.add('is-dragging');
+				stop();
+				viewport.setPointerCapture(event.pointerId);
+			});
+
+			viewport.addEventListener('pointermove', function (event) {
+				if (!dragging || event.pointerId !== activePointer || !track) return;
+				var dx = event.clientX - startX;
+				if (Math.abs(dx) > 8) moved = true;
+				if (!moved) return;
+				var width = slideWidth();
+				var min = -maxIndex() * width;
+				var next = Math.max(min, Math.min(0, startTranslate + dx));
+				track.style.transform = 'translateX(' + next + 'px)';
+			});
+
+			function endDrag(event) {
+				if (!dragging || event.pointerId !== activePointer) return;
+				dragging = false;
+				activePointer = null;
+				root.classList.remove('is-dragging');
+				if (track) track.style.transition = '';
+				if (moved) {
+					var width = slideWidth() || 1;
+					go(Math.round(-(startTranslate + (event.clientX - startX)) / width));
+				} else {
+					go(index);
+				}
+				start();
+			}
+
+			viewport.addEventListener('pointerup', endDrag);
+			viewport.addEventListener('pointercancel', endDrag);
+
+			root.addEventListener('click', function (event) {
+				if (!moved) return;
+				event.preventDefault();
+				event.stopPropagation();
+				moved = false;
+			}, true);
+		}
 
 		root.addEventListener('mouseenter', stop);
 		root.addEventListener('mouseleave', start);

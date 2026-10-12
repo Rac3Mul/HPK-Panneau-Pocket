@@ -743,6 +743,7 @@ class HPK_PP_Admin {
 			'[panneaupocket_agenda layout="grid" limit="8" show_image="true"]',
 			'[panneaupocket_agenda_slider]',
 			'[panneaupocket_actus]',
+			'[panneaupocket_une]',
 		);
 		?>
 		<div class="wrap hpk-pp-admin">
@@ -781,7 +782,15 @@ class HPK_PP_Admin {
 				<code>[panneaupocket_actus]</code>
 				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_actus]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
 			</div>
-			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : limit, button_text, interval, city_id. « Plus de détails » ouvre la page /a-la-une/. Widget Elementor : « PanneauPocket Actualités ».', 'hpk-panneaupocket' ); ?></p>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Attributs : limit, button_text, interval, city_id. « Plus de détails » ouvre la page qui contient [panneaupocket_une]. Widget Elementor : « PanneauPocket Actualités ».', 'hpk-panneaupocket' ); ?></p>
+			<?php HPK_PP_Admin_UI::card_close(); ?>
+
+			<?php HPK_PP_Admin_UI::card_open( __( 'Page À la une', 'hpk-panneaupocket' ) ); ?>
+			<p class="hpk-pp-field__help"><?php esc_html_e( 'Créez une page WordPress (par exemple « À la une ») et collez ce code court dedans. La liste, la recherche, les news récentes et l’article restent dans cette page.', 'hpk-panneaupocket' ); ?></p>
+			<div class="hpk-pp-copy-block">
+				<code>[panneaupocket_une]</code>
+				<button type="button" class="button hpk-pp-copy-btn" data-copy="[panneaupocket_une]"><?php esc_html_e( 'Copier', 'hpk-panneaupocket' ); ?></button>
+			</div>
 			<?php HPK_PP_Admin_UI::card_close(); ?>
 
 			<?php HPK_PP_Admin_UI::card_open( __( 'Actualités synchronisées', 'hpk-panneaupocket' ) ); ?>
