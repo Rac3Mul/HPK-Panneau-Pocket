@@ -22,9 +22,7 @@ $more_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" vie
 		<?php if ( $item ) : ?>
 			<article class="hpk-pp-une__article">
 				<a class="hpk-pp-une__back" href="<?php echo esc_url( $base ); ?>"><?php esc_html_e( 'Toutes les actualités', 'hpk-panneaupocket' ); ?></a>
-				<?php if ( ! empty( $item['image'] ) ) : ?>
-					<img class="hpk-pp-une__hero" src="<?php echo esc_url( $item['image'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" />
-				<?php endif; ?>
+				<h2 class="hpk-pp-une__title"><?php echo esc_html( $item['title'] ); ?></h2>
 				<p class="hpk-pp-une__meta">
 					<?php if ( ! empty( $item['date'] ) ) : ?>
 						<span><?php echo esc_html( HPK_PP_Agenda::format_long_date( $item['date'] ) ); ?></span>
@@ -32,11 +30,10 @@ $more_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" vie
 					<?php endif; ?>
 					<span class="hpk-pp-une__label"><?php esc_html_e( 'Actualité', 'hpk-panneaupocket' ); ?></span>
 				</p>
-				<h2 class="hpk-pp-une__title"><?php echo esc_html( $item['title'] ); ?></h2>
-				<?php if ( ! empty( $item['excerpt'] ) ) : ?>
-					<p class="hpk-pp-une__lead"><?php echo esc_html( HPK_PP_Agenda::trim_text( preg_replace( '/\s+/u', ' ', $item['excerpt'] ), 180 ) ); ?></p>
+				<?php if ( ! empty( $item['image'] ) ) : ?>
+					<img class="hpk-pp-une__hero" src="<?php echo esc_url( $item['image'] ); ?>" alt="" />
 				<?php endif; ?>
-				<div class="hpk-pp-une__text"><?php echo wp_kses_post( $item['html'] ?? '' ); ?></div>
+				<div class="hpk-pp-une__text"><?php echo wp_kses_post( HPK_PP_Agenda::strip_repeated_title( $item['html'] ?? '', $item['title'] ) ); ?></div>
 			</article>
 		<?php else : ?>
 			<?php if ( '' !== $query ) : ?>

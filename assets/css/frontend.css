@@ -1101,16 +1101,21 @@ body.hpk-pp-agenda-open {
 	display: block;
 	width: 100%;
 	height: auto;
+	margin: 0 0 18px;
 	border-radius: 18px;
 	object-fit: cover;
 	aspect-ratio: 16 / 9;
+}
+
+.hpk-pp-une__article .hpk-pp-une__title {
+	margin: 0 0 6px;
 }
 
 .hpk-pp-une__meta {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	margin: 18px 0 8px;
+	margin: 0 0 14px;
 	color: #636d6c;
 	font-size: 15px;
 }

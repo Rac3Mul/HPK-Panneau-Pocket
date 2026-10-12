@@ -621,6 +621,61 @@ class HPK_PP_Agenda {
 	}
 
 	/**
+	 * Drop a repeated title from the article body.
+	 *
+	 * @param string $html Article HTML.
+	 * @param string $title Article title.
+	 * @return string
+	 */
+	public static function strip_repeated_title( $html, $title ) {
+		$needle = self::fold_label( $title );
+		if ( '' === $needle || '' === trim( (string) $html ) ) {
+			return $html;
+		}
+
+		$quoted        = preg_quote( $title, '/' );
+		$stripped_lead = false;
+		$html          = preg_replace_callback(
+			'/<(p|div|li|h[1-6])\b[^>]*>.*?<\/\1>/is',
+			static function ( $match ) use ( $needle, $quoted, &$stripped_lead ) {
+				$text = HPK_PP_Agenda::fold_label( wp_strip_all_tags( $match[0] ) );
+				$text = preg_replace( '/^[^\p{L}\p{N}]+/u', '', $text );
+				if ( $text === $needle ) {
+					return '';
+				}
+				if ( ! $stripped_lead && 0 === strpos( (string) $text, $needle ) ) {
+					$stripped_lead = true;
+					return preg_replace( '/' . $quoted . '/iu', '', $match[0], 1 );
+				}
+				return $match[0];
+			},
+			$html
+		);
+
+		if ( ! $stripped_lead ) {
+			$html = preg_replace(
+				'/^(\s*(?:<[^>]+>\s*)*)' . $quoted . '\b/iu',
+				'$1',
+				$html,
+				1
+			);
+		}
+
+		return trim( (string) $html );
+	}
+
+	/**
+	 * Lowercase label used to compare a title with body text.
+	 *
+	 * @param string $text Text.
+	 * @return string
+	 */
+	private static function fold_label( $text ) {
+		$text = self::normalize_label( wp_strip_all_tags( (string) $text ) );
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $text ) : strtolower( $text );
+	}
+
+	/**
 	 * Collapse whitespace for a title comparison.
 	 *
 	 * @param string $text Text.
