@@ -171,6 +171,19 @@ class HPK_PP_Agenda {
 	}
 
 	/**
+	 * Whether a published page contains the À la une shortcode.
+	 *
+	 * @return bool
+	 */
+	public static function has_une_page() {
+		$page_id = (int) get_option( 'hpk_pp_une_page_id' );
+		if ( $page_id > 0 && 'publish' === get_post_status( $page_id ) ) {
+			return true;
+		}
+		return self::locate_une_page() > 0;
+	}
+
+	/**
 	 * Archive URL.
 	 *
 	 * @return string

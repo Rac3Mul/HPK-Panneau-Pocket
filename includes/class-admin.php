@@ -45,6 +45,19 @@ class HPK_PP_Admin {
 		add_action( 'admin_post_hpk_pp_export_logs', array( $this, 'export_logs' ) );
 		add_action( 'admin_post_hpk_pp_purge_logs', array( $this, 'purge_logs' ) );
 		add_action( 'admin_post_hpk_pp_save_publication', array( $this, 'save_publication' ) );
+		add_action( 'admin_notices', array( $this, 'notice_une_page' ) );
+	}
+
+	/**
+	 * Remind the editor to create the À la une page.
+	 */
+	public function notice_une_page() {
+		if ( ! current_user_can( 'edit_pages' ) || ! class_exists( 'HPK_PP_Agenda' ) || HPK_PP_Agenda::has_une_page() ) {
+			return;
+		}
+		echo '<div class="notice notice-warning"><p><strong>PanneauPocket.</strong> ';
+		echo esc_html__( '« Plus de détails » n’ouvre rien tant que la page des actualités n’existe pas. Créez une page (titre « À la une »), collez le code court [panneaupocket_une], puis publiez-la.', 'hpk-panneaupocket' );
+		echo '</p></div>';
 	}
 
 	/**

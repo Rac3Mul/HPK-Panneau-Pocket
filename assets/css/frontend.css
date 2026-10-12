@@ -867,13 +867,27 @@ body.hpk-pp-agenda-open {
 	object-position: center;
 	margin: 0 !important;
 	border-radius: 0 !important;
-	transform: scale(1);
-	transition: transform 0.5s ease;
+	-webkit-user-drag: none;
+	user-select: none;
 }
 
-.hpk-pp-actus__card:hover .hpk-pp-actus__media img,
-.hpk-pp-actus__card:focus-visible .hpk-pp-actus__media img {
-	transform: scale(1.15) rotate(5deg) !important;
+.hpk-pp-actus__media::before {
+	content: '';
+	position: absolute;
+	z-index: 2;
+	top: 0;
+	left: -75%;
+	width: 50%;
+	height: 100%;
+	background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.35) 100%);
+	transform: skewX(-25deg);
+	transition: left 0.75s ease;
+	pointer-events: none;
+}
+
+.hpk-pp-actus__card:hover .hpk-pp-actus__media::before,
+.hpk-pp-actus__card:focus-visible .hpk-pp-actus__media::before {
+	left: 125%;
 }
 
 .hpk-pp-actus__body {
@@ -929,13 +943,20 @@ body.hpk-pp-agenda-open {
 }
 
 .hpk-pp-actus__title {
+	align-self: flex-start;
+	max-width: 100%;
 	margin: 0 0 16px;
 	font-size: 22px;
 	font-weight: 700;
 	line-height: 1.35;
 	letter-spacing: -0.34px;
 	color: #002749;
-	transition: color 0.25s ease;
+	background-image: linear-gradient(to right, #0268ad, #0268ad 50%, #002749 50%);
+	background-size: 200% 100%;
+	background-position: 100% 0;
+	-webkit-background-clip: text;
+	background-clip: text;
+	transition: background-position 0.5s ease;
 	display: -webkit-box;
 	-webkit-line-clamp: 3;
 	-webkit-box-orient: vertical;
@@ -944,32 +965,39 @@ body.hpk-pp-agenda-open {
 
 .hpk-pp-actus__card:hover .hpk-pp-actus__title,
 .hpk-pp-actus__card:focus-visible .hpk-pp-actus__title {
-	color: #0268ad;
+	background-position: 0 0;
+	-webkit-text-fill-color: transparent;
 }
 
 .hpk-pp-actus__more {
 	position: relative;
+	align-self: flex-start;
+	width: auto;
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
 	margin-top: auto;
-	color: #0268ad;
+	padding: 0;
+	color: #0268ad !important;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
 	font-weight: 800;
 	font-size: 16px;
 	line-height: 1.75;
-	background: transparent;
 	text-decoration: none;
 }
 
 .hpk-pp-actus__more::after {
 	content: '';
 	position: absolute;
+	left: auto;
 	right: 0;
 	bottom: 0;
 	width: 0;
 	height: 1px;
 	background: currentColor;
-	transition: width 0.25s ease;
+	transition: width 0.35s ease, left 0.35s ease, right 0.35s ease;
 }
 
 .hpk-pp-actus__more svg {
@@ -1052,15 +1080,10 @@ body.hpk-pp-agenda-open {
 
 @media (prefers-reduced-motion: reduce) {
 	.hpk-pp-actus__track,
-	.hpk-pp-actus__media img,
+	.hpk-pp-actus__media::before,
 	.hpk-pp-actus__more::after,
 	.hpk-pp-actus__title {
 		transition: none;
-	}
-
-	.hpk-pp-actus__card:hover .hpk-pp-actus__media img,
-	.hpk-pp-actus__card:focus-visible .hpk-pp-actus__media img {
-		transform: none !important;
 	}
 }
 

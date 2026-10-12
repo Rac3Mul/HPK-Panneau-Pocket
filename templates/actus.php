@@ -28,7 +28,7 @@ $interval = isset( $interval ) ? absint( $interval ) : 3000;
 					<a class="hpk-pp-actus__card" href="<?php echo esc_url( HPK_PP_Agenda::news_url( $item['id'] ) ); ?>">
 						<div class="hpk-pp-actus__media">
 							<?php if ( ! empty( $item['image'] ) ) : ?>
-								<img src="<?php echo esc_url( $item['image'] ); ?>" alt="" loading="lazy" />
+								<img src="<?php echo esc_url( $item['image'] ); ?>" alt="" loading="lazy" draggable="false" />
 							<?php endif; ?>
 						</div>
 						<div class="hpk-pp-actus__body">
@@ -41,8 +41,8 @@ $interval = isset( $interval ) ? absint( $interval ) : 3000;
 							<p class="hpk-pp-actus__meta"><?php esc_html_e( 'Actualité', 'hpk-panneaupocket' ); ?></p>
 							<h3 class="hpk-pp-actus__title"><?php echo esc_html( $item['title'] ); ?></h3>
 							<span class="hpk-pp-actus__more">
-								<?php echo esc_html( $button_text ); ?>
 								<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M10.0035 3.4083L1.41176 12L0 10.5882L8.59171 1.99654H1.01905V0H12V10.981H10.0035V3.4083Z" fill="currentColor"/></svg>
+								<span><?php echo esc_html( $button_text ); ?></span>
 							</span>
 						</div>
 					</a>

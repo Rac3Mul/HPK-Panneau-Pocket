@@ -104,7 +104,9 @@
 
 		if (viewport) {
 			viewport.addEventListener('pointerdown', function (event) {
-				if (event.button !== 0 || event.target.closest('.hpk-pp-actus__dots')) return;
+				if (event.pointerType === 'mouse' && event.button !== 0) return;
+				if (event.target.closest('.hpk-pp-actus__dots')) return;
+				event.preventDefault();
 				dragging = true;
 				moved = false;
 				startX = event.clientX;
@@ -113,7 +115,7 @@
 				if (track) track.style.transition = 'none';
 				root.classList.add('is-dragging');
 				stop();
-				viewport.setPointerCapture(event.pointerId);
+				if (viewport.setPointerCapture) viewport.setPointerCapture(event.pointerId);
 			});
 
 			viewport.addEventListener('pointermove', function (event) {
@@ -138,6 +140,8 @@
 					go(Math.round(-(startTranslate + (event.clientX - startX)) / width));
 				} else {
 					go(index);
+					var link = event.target.closest('a.hpk-pp-actus__card');
+					if (link && link.getAttribute('href')) window.location.href = link.href;
 				}
 				start();
 			}
