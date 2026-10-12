@@ -124,7 +124,7 @@ class HPK_PP_Agenda {
 			return array();
 		}
 
-		$cache_key = 'hpk_pp_news_v2_' . $city_id;
+		$cache_key = 'hpk_pp_news_v3_' . $city_id;
 		$news      = get_transient( $cache_key );
 
 		if ( false === $news ) {
@@ -280,8 +280,8 @@ class HPK_PP_Agenda {
 
 		set_transient( 'hpk_pp_agenda_v5_' . $city_id, $events, self::CACHE_TTL );
 		update_option( 'hpk_pp_agenda_backup_v5_' . $city_id, $events, false );
-		set_transient( 'hpk_pp_news_v2_' . $city_id, $news, self::CACHE_TTL );
-		update_option( 'hpk_pp_news_backup_v2_' . $city_id, $news, false );
+		set_transient( 'hpk_pp_news_v3_' . $city_id, $news, self::CACHE_TTL );
+		update_option( 'hpk_pp_news_backup_v3_' . $city_id, $news, false );
 
 		return $events;
 	}
@@ -302,12 +302,29 @@ class HPK_PP_Agenda {
 			if ( $done >= $limit || ( microtime( true ) - $start ) > 12 ) {
 				break;
 			}
-			if ( empty( $item['image'] ) || false === strpos( $item['image'], 'panneau-pocket' ) ) {
-				continue;
+			$queue = array();
+			if ( ! empty( $item['image'] ) ) {
+				$queue[] = array( 'image', $item['image'] );
 			}
-			$local = self::localize_image( $item['image'] );
-			if ( $local !== $item['image'] ) {
-				$items[ $index ]['image'] = $local;
+			foreach ( $item['images'] ?? array() as $extra_index => $extra_url ) {
+				$queue[] = array( $extra_index, $extra_url );
+			}
+			foreach ( $queue as $job ) {
+				if ( $done >= $limit || ( microtime( true ) - $start ) > 12 ) {
+					break 2;
+				}
+				if ( false === strpos( (string) $job[1], 'panneau-pocket' ) ) {
+					continue;
+				}
+				$local = self::localize_image( $job[1] );
+				if ( $local === $job[1] ) {
+					continue;
+				}
+				if ( 'image' === $job[0] ) {
+					$items[ $index ]['image'] = $local;
+				} else {
+					$items[ $index ]['images'][ $job[0] ] = $local;
+				}
 				$done++;
 			}
 		}
@@ -396,7 +413,7 @@ class HPK_PP_Agenda {
 	 * @return array
 	 */
 	private static function get_news_backup( $city_id ) {
-		$backup = get_option( 'hpk_pp_news_backup_v2_' . $city_id, array() );
+		$backup = get_option( 'hpk_pp_news_backup_v3_' . $city_id, array() );
 		return is_array( $backup ) ? $backup : array();
 	}
 
@@ -548,13 +565,16 @@ class HPK_PP_Agenda {
 				$id = (string) sprintf( '%u', crc32( $title . '|' . $date ) );
 			}
 
-			$image = '';
-			if ( $content ) {
-				$img = $xpath->query( './/img', $content )->item( 0 );
-				if ( $img && $img->getAttribute( 'src' ) ) {
-					$image = $img->getAttribute( 'src' );
+			$images = array();
+			foreach ( $xpath->query( './/img', $item ) as $img ) {
+				$src = trim( $img->getAttribute( 'src' ) );
+				if ( '' === $src || false === strpos( $src, 'sign_image' ) || in_array( $src, $images, true ) ) {
+					continue;
 				}
+				$images[] = $src;
 			}
+			$image = $images[0] ?? '';
+			$extra = array_slice( $images, 1 );
 
 			$html = '';
 			$text = '';
@@ -578,7 +598,10 @@ class HPK_PP_Agenda {
 				}
 				$html = preg_replace( '/<a[^>]*>\s*<img[^>]*>\s*<\/a>/i', '', $html );
 				$html = preg_replace( '/<img[^>]*>/i', '', $html );
+				$html = preg_replace( '/(<br\s*\/?>\s*){2,}/i', '<br>', $html );
+				$html = preg_replace( '/<p>\s*(?:<br\s*\/?>\s*)*<\/p>/i', '', $html );
 				$html = wp_kses_post( $html );
+				$html = self::linkify( $html );
 				$text = self::html_to_text( $html );
 			}
 
@@ -592,6 +615,7 @@ class HPK_PP_Agenda {
 				'excerpt'    => $text,
 				'html'       => $html,
 				'image'      => $image,
+				'images'     => $extra,
 				'url'        => $id ? add_query_arg( 'panneau', $id, $ville_url ) : $ville_url,
 			);
 		}
@@ -618,6 +642,33 @@ class HPK_PP_Agenda {
 		$cut = preg_replace( '/\s+\S*$/u', '', $cut );
 
 		return rtrim( $cut ) . '…';
+	}
+
+	/**
+	 * Turn bare URLs into links, without touching existing anchors.
+	 *
+	 * @param string $html HTML.
+	 * @return string
+	 */
+	public static function linkify( $html ) {
+		$parts = preg_split( '/(<a\b[^>]*>.*?<\/a>)/is', (string) $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+		if ( ! is_array( $parts ) ) {
+			return $html;
+		}
+		foreach ( $parts as $index => $part ) {
+			if ( preg_match( '/^<a\b/i', $part ) ) {
+				continue;
+			}
+			$parts[ $index ] = preg_replace_callback(
+				'/https?:\/\/[^\s<]+/i',
+				static function ( $match ) {
+					$url = rtrim( $match[0], '.,);' );
+					return '<a href="' . esc_url( $url ) . '">' . esc_html( $url ) . '</a>';
+				},
+				$part
+			);
+		}
+		return implode( '', $parts );
 	}
 
 	/**

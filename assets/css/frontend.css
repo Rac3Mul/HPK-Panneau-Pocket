@@ -1146,11 +1146,33 @@ body.hpk-pp-agenda-open {
 	line-height: 1.55;
 }
 
-.hpk-pp-une__text p {
-	margin: 0 0 0.9rem;
+.hpk-pp-une__text p,
+.hpk-pp-une__text div {
+	margin: 0 0 0.35rem !important;
 	font-size: 17px;
-	line-height: 1.6;
+	line-height: 1.45;
 	color: #243028;
+}
+
+.hpk-pp-une__text a {
+	color: #0268ad !important;
+	font-weight: 700;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.hpk-pp-une__gallery {
+	display: grid;
+	gap: 12px;
+	margin-top: 16px;
+}
+
+.hpk-pp-une__gallery img {
+	display: block;
+	width: 100% !important;
+	height: auto !important;
+	border-radius: 12px;
+	object-fit: contain;
 }
 
 .hpk-pp-une__back {

@@ -34,6 +34,13 @@ $more_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" vie
 					<img class="hpk-pp-une__hero" src="<?php echo esc_url( $item['image'] ); ?>" alt="" />
 				<?php endif; ?>
 				<div class="hpk-pp-une__text"><?php echo wp_kses_post( HPK_PP_Agenda::strip_repeated_title( $item['html'] ?? '', $item['title'] ) ); ?></div>
+				<?php if ( ! empty( $item['images'] ) ) : ?>
+					<div class="hpk-pp-une__gallery">
+						<?php foreach ( $item['images'] as $extra ) : ?>
+							<img src="<?php echo esc_url( $extra ); ?>" alt="" loading="lazy" decoding="async" />
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 			</article>
 		<?php else : ?>
 			<?php if ( '' !== $query ) : ?>
