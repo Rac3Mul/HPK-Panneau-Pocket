@@ -1152,10 +1152,14 @@ body.hpk-pp-agenda-open {
 
 .hpk-pp-une__text p,
 .hpk-pp-une__text div {
-	margin: 0 0 0.35rem !important;
+	margin: 0 0 0.85rem !important;
 	font-size: 17px;
-	line-height: 1.45;
+	line-height: 1.55;
 	color: #243028;
+}
+
+.hpk-pp-une__text p:last-child {
+	margin-bottom: 0 !important;
 }
 
 .hpk-pp-une__text a {
