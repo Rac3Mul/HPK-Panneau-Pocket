@@ -21,9 +21,8 @@ $position_class = 'bottom-left' === $position ? 'hpk-pp-floating--bottom-left' :
 	<div class="hpk-pp-panel" id="hpk-pp-panel" hidden>
 		<button type="button" class="hpk-pp-close" aria-label="<?php esc_attr_e( 'Fermer', 'hpk-panneaupocket' ); ?>">&times;</button>
 		<iframe
-			src="<?php echo esc_url( $url ); ?>"
+			data-src="<?php echo esc_url( $url ); ?>"
 			title="<?php esc_attr_e( 'PanneauPocket', 'hpk-panneaupocket' ); ?>"
-			loading="lazy"
 			allow="fullscreen"
 		></iframe>
 	</div>

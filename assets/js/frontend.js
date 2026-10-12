@@ -14,7 +14,14 @@
 		return floating.classList.contains('is-open');
 	}
 
+	function loadFrame() {
+		var frame = panel.querySelector('iframe');
+		if (!frame || frame.getAttribute('src') || !frame.getAttribute('data-src')) return;
+		frame.src = frame.getAttribute('data-src');
+	}
+
 	function openPanel() {
+		loadFrame();
 		panel.removeAttribute('hidden');
 		floating.classList.add('is-open');
 		toggle.setAttribute('aria-expanded', 'true');
