@@ -111,9 +111,58 @@ $single    = ! empty( $item );
 				<?php if ( ! empty( $item['images'] ) ) : ?>
 					<div class="hpk-pp-une__gallery">
 						<?php foreach ( $item['images'] as $extra ) : ?>
-							<img src="<?php echo esc_url( $extra ); ?>" alt="" loading="lazy" decoding="async" />
+							<button type="button" class="hpk-pp-une__shot" data-src="<?php echo esc_url( $extra ); ?>" aria-label="<?php esc_attr_e( 'Agrandir la photo', 'hpk-panneaupocket' ); ?>">
+								<img src="<?php echo esc_url( $extra ); ?>" alt="" loading="lazy" decoding="async" />
+							</button>
 						<?php endforeach; ?>
 					</div>
+					<div class="hpk-pp-une__lightbox" hidden>
+						<button type="button" class="hpk-pp-une__lightbox-close" aria-label="<?php esc_attr_e( 'Fermer', 'hpk-panneaupocket' ); ?>">×</button>
+						<button type="button" class="hpk-pp-une__lightbox-prev" aria-label="<?php esc_attr_e( 'Photo précédente', 'hpk-panneaupocket' ); ?>">‹</button>
+						<img alt="" />
+						<button type="button" class="hpk-pp-une__lightbox-next" aria-label="<?php esc_attr_e( 'Photo suivante', 'hpk-panneaupocket' ); ?>">›</button>
+					</div>
+					<script>
+					(function () {
+						var box = document.currentScript && document.currentScript.previousElementSibling;
+						var gallery = box && box.previousElementSibling;
+						if (!gallery || !box || !gallery.classList.contains('hpk-pp-une__gallery')) return;
+						var shots = Array.prototype.slice.call(gallery.querySelectorAll('.hpk-pp-une__shot'));
+						var view = box.querySelector('img');
+						var prev = box.querySelector('.hpk-pp-une__lightbox-prev');
+						var next = box.querySelector('.hpk-pp-une__lightbox-next');
+						var index = 0;
+						function show(i) {
+							if (!shots.length) return;
+							index = (i + shots.length) % shots.length;
+							view.src = shots[index].getAttribute('data-src');
+							var many = shots.length > 1;
+							prev.hidden = !many;
+							next.hidden = !many;
+							box.hidden = false;
+							document.body.classList.add('hpk-pp-lightbox-open');
+						}
+						function close() {
+							box.hidden = true;
+							view.removeAttribute('src');
+							document.body.classList.remove('hpk-pp-lightbox-open');
+						}
+						shots.forEach(function (shot, i) {
+							shot.addEventListener('click', function () { show(i); });
+						});
+						box.addEventListener('click', function (event) {
+							if (event.target === box || event.target.classList.contains('hpk-pp-une__lightbox-close')) close();
+						});
+						prev.addEventListener('click', function (event) { event.stopPropagation(); show(index - 1); });
+						next.addEventListener('click', function (event) { event.stopPropagation(); show(index + 1); });
+						document.addEventListener('keydown', function (event) {
+							if (box.hidden) return;
+							if (event.key === 'Escape') close();
+							if (event.key === 'ArrowLeft') show(index - 1);
+							if (event.key === 'ArrowRight') show(index + 1);
+						});
+					})();
+					</script>
 				<?php endif; ?>
 			</article>
 		<?php else : ?>

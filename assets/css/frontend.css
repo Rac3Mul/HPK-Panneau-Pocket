@@ -1180,17 +1180,109 @@ body.hpk-pp-agenda-open {
 }
 
 .hpk-pp-une__gallery {
-	display: grid;
-	gap: 12px;
-	margin-top: 16px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 22px;
 }
 
-.hpk-pp-une__gallery img {
+.hpk-pp-une__shot {
+	display: block;
+	width: 148px !important;
+	height: 110px !important;
+	min-height: 0;
+	margin: 0;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 10px;
+	overflow: hidden;
+	background: #e7eeea;
+	cursor: zoom-in;
+	line-height: 0;
+}
+
+.hpk-pp-une__shot img {
 	display: block;
 	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	object-fit: cover;
+	border-radius: 0;
+	transition: transform 0.25s ease;
+}
+
+.hpk-pp-une__shot:hover img,
+.hpk-pp-une__shot:focus-visible img {
+	transform: scale(1.06);
+}
+
+.hpk-pp-une__lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 28px 16px;
+	background: rgba(0, 18, 28, 0.86);
+}
+
+.hpk-pp-une__lightbox[hidden] {
+	display: none !important;
+}
+
+.hpk-pp-une__lightbox img {
+	display: block;
+	width: auto !important;
 	height: auto !important;
-	border-radius: 12px;
+	max-width: min(1080px, calc(100vw - 140px)) !important;
+	max-height: calc(100vh - 72px) !important;
 	object-fit: contain;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.hpk-pp-une__lightbox-close,
+.hpk-pp-une__lightbox-prev,
+.hpk-pp-une__lightbox-next {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 0;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 999px !important;
+	background: #fff !important;
+	color: #002749 !important;
+	cursor: pointer;
+	line-height: 1;
+}
+
+.hpk-pp-une__lightbox-close {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	width: 42px !important;
+	height: 42px !important;
+	font-size: 28px;
+}
+
+.hpk-pp-une__lightbox-prev,
+.hpk-pp-une__lightbox-next {
+	flex: 0 0 auto;
+	width: 44px !important;
+	height: 44px !important;
+	font-size: 32px;
+}
+
+.hpk-pp-une__lightbox-prev[hidden],
+.hpk-pp-une__lightbox-next[hidden] {
+	display: none !important;
+}
+
+body.hpk-pp-lightbox-open {
+	overflow: hidden;
 }
 
 .hpk-pp-une__back {
