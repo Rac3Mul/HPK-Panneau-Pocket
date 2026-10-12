@@ -1087,6 +1087,10 @@ body.hpk-pp-agenda-open {
 	}
 }
 
+.hpk-pp-une-skip {
+	display: none !important;
+}
+
 .hpk-pp-une {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) 320px;

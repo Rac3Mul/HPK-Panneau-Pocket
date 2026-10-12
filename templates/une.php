@@ -16,8 +16,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $more_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M10.0035 3.4083L1.41176 12L0 10.5882L8.59171 1.99654H1.01905V0H12V10.981H10.0035V3.4083Z" fill="currentColor"/></svg>';
+$single    = ! empty( $item );
 ?>
-<div class="hpk-pp-une">
+<?php if ( $single ) : ?>
+<script>
+(function () {
+	var root = document.currentScript && document.currentScript.nextElementSibling;
+	if (!root) return;
+	var banner = document.getElementById('pxl-page-title');
+	if (banner) banner.classList.add('hpk-pp-une-skip');
+	var main = document.getElementById('pxl-main') || document.body;
+	var node = root;
+	while (node && node !== main) {
+		var sib = node.previousElementSibling;
+		while (sib) {
+			sib.classList.add('hpk-pp-une-skip');
+			sib = sib.previousElementSibling;
+		}
+		node = node.parentElement;
+	}
+})();
+</script>
+<?php endif; ?>
+<div class="hpk-pp-une<?php echo $single ? ' hpk-pp-une--single' : ''; ?>">
 	<div class="hpk-pp-une__main">
 		<?php if ( $item ) : ?>
 			<article class="hpk-pp-une__article">
