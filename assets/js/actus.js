@@ -93,6 +93,7 @@
 		var startX = 0;
 		var startTranslate = 0;
 		var activePointer = null;
+		var pendingHref = '';
 
 		function slideWidth() {
 			return slides[0] ? slides[0].getBoundingClientRect().width : 0;
@@ -105,7 +106,9 @@
 		if (viewport) {
 			viewport.addEventListener('pointerdown', function (event) {
 				if (event.pointerType === 'mouse' && event.button !== 0) return;
-				if (event.target.closest('.hpk-pp-actus__dots')) return;
+				if (event.target.closest('.hpk-pp-actus__dots, button')) return;
+				var link = event.target.closest('a.hpk-pp-actus__card');
+				pendingHref = link ? link.href : '';
 				event.preventDefault();
 				dragging = true;
 				moved = false;
@@ -129,7 +132,7 @@
 				track.style.transform = 'translateX(' + next + 'px)';
 			});
 
-			function endDrag(event) {
+			function finishDrag(event, followLink) {
 				if (!dragging || event.pointerId !== activePointer) return;
 				dragging = false;
 				activePointer = null;
@@ -138,16 +141,20 @@
 				if (moved) {
 					var width = slideWidth() || 1;
 					go(Math.round(-(startTranslate + (event.clientX - startX)) / width));
-				} else {
-					go(index);
-					var link = event.target.closest('a.hpk-pp-actus__card');
-					if (link && link.getAttribute('href')) window.location.href = link.href;
+					pendingHref = '';
+				} else if (followLink && pendingHref) {
+					window.location.href = pendingHref;
+					return;
 				}
 				start();
 			}
 
-			viewport.addEventListener('pointerup', endDrag);
-			viewport.addEventListener('pointercancel', endDrag);
+			viewport.addEventListener('pointerup', function (event) {
+				finishDrag(event, true);
+			});
+			viewport.addEventListener('pointercancel', function (event) {
+				finishDrag(event, false);
+			});
 
 			root.addEventListener('click', function (event) {
 				if (!moved) return;
